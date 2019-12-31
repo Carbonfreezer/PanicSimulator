@@ -8,10 +8,6 @@
 class IconalSolver
 {
 public:
-	// Sets the information where the walls are.
-	void SetWallFile(const char* wallInformation);
-	// Sets the information where the target areas are.
-	void SetTargetArea(const char* targetInformation);
 
 	// Visualizes the outcome of the simulation.
 	void VisualizeOutcome(uchar4* destinationMemory, float maxTimeAssumed, float distanceBetweenIsoLines);
@@ -20,7 +16,7 @@ public:
 	void PrepareSolving();
 
 	// Performs n iteration steps.
-	void PerformIterations(int outerIterations);
+	void PerformIterations(int outerIterations, float* velocityField, size_t velocityStride, unsigned int* targetAreaInformation, size_t targetAreaStride);
 
 	// Asks for the time field.
 	float* GetTimeField(size_t& timeStride);
@@ -32,18 +28,8 @@ private:
 	float* m_bufferTime[2];
 	// The stride for the time buffer.
 	size_t m_timeStride;
-	// The original wall field.
-	unsigned int* m_wallInformation;
-	size_t m_wallStride;
-	// The original informaton with the target area.
-	unsigned int* m_targetAreaInformation;
-	size_t m_targetStride;
-	// The area with the velocity field we have.
-	float* m_velocityField;
-	size_t m_velocityStride;
+	
 
-	TgaReader m_wallPicture;
-	TgaReader m_targetPicture;
 
 	TransferHelper m_transferHelper;
 };

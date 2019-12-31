@@ -13,6 +13,9 @@
     <CudaCompile Include="TransferHelper.cu">
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </CudaCompile>
+    <CudaCompile Include="DensityManager.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -30,6 +33,9 @@
     </ClCompile>
     <ClCompile Include="TgaReader.cpp">
       <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="VelocityTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +74,12 @@
     </ClInclude>
     <ClInclude Include="TransferHelper.h">
       <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="DensityManager.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="VelocityTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

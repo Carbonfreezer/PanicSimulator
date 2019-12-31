@@ -69,12 +69,19 @@ __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, floa
 void VelocityManager::UpdateVelocityField(float* densityField, size_t densityStride)
 {
 	assert(m_velocityField);
+	assert(m_wallArea);
 	UpdateVelocity CUDA_DECORATOR_LOGIC(m_velocityField, m_velocityStride, densityField, densityStride, m_wallArea, m_wallStride);
 }
 
 void VelocityManager::ApplyWallVisualization(uchar4* textureMemory, uchar4 colorToApply)
 {
 	m_helperTransfer.MarcColor(m_wallArea, m_wallStride, textureMemory, colorToApply);
+}
+
+void VelocityManager::GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance)
+{
+	m_helperTransfer.VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, m_velocityStride, textureMemory);
+	m_helperTransfer.VisualizeIsoLines(m_velocityField, isoLineDistance, m_velocityStride, textureMemory);
 }
 
 

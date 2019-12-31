@@ -6,7 +6,7 @@
 #include <device_launch_parameters.h>
 #include <math.h>
 #include "CudaHelper.h"
-
+#include <cstring>
 
 
 unsigned int* TransferHelper::UploadPicture(TgaReader* reader, unsigned char boundaryValue, size_t& pitch)
@@ -74,6 +74,13 @@ float* TransferHelper::ReserveFloatMemory(size_t& pitch)
 	// Allocate device memory.
 	void* result;
 	cudaMallocPitch(&result, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+
+	// We fill all with zero at the beginnig.
+	void* temp = malloc(4 * gGridSizeExternal * gGridSizeExternal);
+	memset(temp, 0, gGridSizeExternal * gGridSizeExternal * 4);
+	cudaMemcpy2D(result, pitch, temp, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+	free(temp);
+	
 
 	pitch /= 4;
 	return (float*)result;

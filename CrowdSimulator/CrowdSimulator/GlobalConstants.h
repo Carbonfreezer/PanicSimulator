@@ -22,11 +22,16 @@
 // The resulting screen resolution we get.
 #define gScreenResolution  (gGridSizeInternal * gPixelsPerCell)
 
-// The maximum walking velocity we have (meters / second).
-#define gMaximumWalkingVelocity  1.34f
-
 // The distance a cell size has in real world (meters).
 #define gCellSize  0.5f
 
 // The diagonal cell size.
 #define gCellSizeDiagonal (gCellSize * 1.41421f)
+
+
+// The maximum walking velocity we have (meters / second).
+#define gMaximumWalkingVelocity  1.34f
+
+
+// The maximum density in peoples / sqm.
+#define gMaximumDensity 5.5f

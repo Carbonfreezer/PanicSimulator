@@ -7,7 +7,7 @@
 class VelocityManager
 {
 public:
-	VelocityManager() { m_velocityField = NULL; }
+	VelocityManager() { m_velocityField = NULL; m_wallArea = NULL; }
 
 	
 	// Generate velocity field.
@@ -24,8 +24,17 @@ public:
 		return m_velocityField;
 	}
 
+	// Gets the walls, are also used in the density manager to prevent people getting stuck in walls.
+	unsigned int* GetWallInformation(size_t& wallStride)
+	{
+		wallStride = m_wallStride;
+		return m_wallArea;
+	}
+
 	// As we are the only instance that has the wall information we can apply it here.
 	void ApplyWallVisualization(uchar4* textureMemory, uchar4 colorToApply);
+	// Generates a visualization of the velocity field.
+	void GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance);
 	
 private:
 	float* m_velocityField;

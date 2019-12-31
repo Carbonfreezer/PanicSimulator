@@ -88,6 +88,8 @@
     <ClCompile Include="IconalTest.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
     <ClCompile Include="TgaReader.cpp" />
+    <ClCompile Include="VelocityTest.cpp" />
+    <CudaCompile Include="DensityManager.cu" />
     <CudaCompile Include="IconalSolver.cu" />
     <CudaCompile Include="TransferHelper.cu">
       <FileType>CppCode</FileType>
@@ -102,6 +104,7 @@
   <ItemGroup>
     <ClInclude Include="CheckerTest.h" />
     <ClInclude Include="CudaHelper.h" />
+    <ClInclude Include="DensityManager.h" />
     <ClInclude Include="FlagTest.h" />
     <ClInclude Include="FrameWork.h" />
     <ClInclude Include="GlobalConstants.h" />
@@ -112,6 +115,7 @@
     <ClInclude Include="TgaReader.h" />
     <ClInclude Include="TransferHelper.h" />
     <ClInclude Include="VelocityManager.h" />
+    <ClInclude Include="VelocityTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
