@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="IconalSolver.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
+    <CudaCompile Include="VelocityManager.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
+    <CudaCompile Include="CheckerTest.cu">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </CudaCompile>
+    <CudaCompile Include="TransferHelper.cu">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="FlagTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="IconalTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="IsoLineTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameWork.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="TgaReader.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IconalSolver.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="VelocityManager.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="IconalTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="IsoLineTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckerTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicClass.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FlagTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaHelper.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameWork.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalConstants.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="TgaReader.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="TransferHelper.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="HeaderFiles">
+      <UniqueIdentifier>{1d972bec-a71a-4e52-a395-1f8ba0cd79ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles">
+      <UniqueIdentifier>{cae31bd6-1a2e-4d2b-815b-cb450285f853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\TestClasses">
+      <UniqueIdentifier>{eaf0c17e-2758-43ea-97ef-8a8850559a02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\TestClasses">
+      <UniqueIdentifier>{5edfc800-83f4-4cf5-bc2e-2ee908cad8fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HeaderFiles\SupportAndFramework">
+      <UniqueIdentifier>{56beeb82-a187-4f76-a152-1440beedd0ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SourceFiles\SupportAndFramework">
+      <UniqueIdentifier>{4f671ea9-a274-4ce4-b4eb-ca63d76cca64}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
