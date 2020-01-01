@@ -32,7 +32,7 @@ __global__ void GenerateStructure(uchar4* deviceMemory, int pixelExtension, unsi
 	
 }
 
-void CheckerTest::UpdateSystem(uchar4* deviceMemory)
+void CheckerTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
 {
 	m_updateCounter += 1;
 	

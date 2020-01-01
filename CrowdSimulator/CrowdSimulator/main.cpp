@@ -4,6 +4,7 @@
 #include "IsoLineTest.h"
 #include "IconalTest.h"
 #include "VelocityTest.h"
+#include "GradientTest.h"
 
 static FrameWork gBaseFrameWork;
 static CheckerTest gChecker;
@@ -11,6 +12,7 @@ static FlagTest gFlagTest;
 static IsoLineTest gIsoLineTest;
 static IconalTest gIconal;
 static VelocityTest gVelocity;
+static GradientTest gGradientTest;
 
 int main(int argc, char **argv)
 {
@@ -152,7 +154,16 @@ int main(int argc, char **argv)
 		gVelocity.PrepareTest("SpawnAreaCircular.tga", "WallConvoluted.tga", 0.2f);
 		gBaseFrameWork.InitializeFramework(&gVelocity, "Velocity Test 2");
 	}
-
+	else if (argv[1][0] == 'L')
+	{
+		gGradientTest.InitializeTest("BigCircle.tga", "WallConvoluted.tga", 0);
+		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 1");
+	}
+	else if (argv[1][0] == 'M')
+	{
+		gGradientTest.InitializeTest("BigCircle.tga", "WallConvoluted.tga", 1);
+		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 2");
+	}
 	else
 		return 0;
 	

@@ -23,7 +23,7 @@ public:
 
 	void SetIsoLineDistance(float time) { m_isoLineDistance = time; }
 	
-	virtual void UpdateSystem(uchar4* deviceMemory);
+	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
 
 private:
 	IconalSolver m_solver;

@@ -85,11 +85,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FlagTest.cpp" />
+    <ClCompile Include="GradientTest.cpp" />
     <ClCompile Include="IconalTest.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
     <CudaCompile Include="DensityManager.cu" />
+    <CudaCompile Include="GradientModule.cu" />
     <CudaCompile Include="IconalSolver.cu" />
     <CudaCompile Include="TransferHelper.cu">
       <FileType>CppCode</FileType>
@@ -108,6 +110,8 @@
     <ClInclude Include="FlagTest.h" />
     <ClInclude Include="FrameWork.h" />
     <ClInclude Include="GlobalConstants.h" />
+    <ClInclude Include="GradientModule.h" />
+    <ClInclude Include="GradientTest.h" />
     <ClInclude Include="IconalSolver.h" />
     <ClInclude Include="IconalTest.h" />
     <ClInclude Include="IsoLineTest.h" />

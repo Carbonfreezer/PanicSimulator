@@ -9,7 +9,7 @@ void VelocityTest::PrepareTest(const char* densityFile, const char* wallFile, fl
 	m_isoLineDistance = isoLineDistance;
 }
 
-void VelocityTest::UpdateSystem(uchar4* deviceMemory)
+void VelocityTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
 {
 	m_velocityManager.UpdateVelocityField(m_densityData, m_densityStride);
 	m_velocityManager.GenerateVelocityVisualization(deviceMemory, m_isoLineDistance);

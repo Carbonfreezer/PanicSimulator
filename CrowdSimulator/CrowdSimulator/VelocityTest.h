@@ -9,7 +9,7 @@ class VelocityTest : public LogicClass
 public:
 	void PrepareTest(const char* densityFile, const char* wallFile, float isoLineDistance);
 
-	virtual void UpdateSystem(uchar4* deviceMemory);
+	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
 
 private:
 	TgaReader m_densityFile;

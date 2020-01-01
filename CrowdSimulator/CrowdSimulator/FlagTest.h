@@ -11,7 +11,7 @@ public:
 
 	void LoadFlagPicture(const char* fileName);
 	void LoadScalarPicture(const char* fileName);
-	virtual void UpdateSystem(uchar4* deviceMemory);
+	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
 
 private:
 	TgaReader m_maskPicture;

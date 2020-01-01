@@ -18,6 +18,8 @@ void FrameWork::InitializeFramework(LogicClass* usedLogic, const char* windowTit
 void FrameWork::RunCoreLoop()
 {
 	// Game loop
+	double lastTime = glfwGetTime();
+	double timeDifference = 0.0;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
@@ -29,7 +31,7 @@ void FrameWork::RunCoreLoop()
 		cudaGraphicsMapResources(1, &m_cuda_pixel_buffer_object);
 		cudaGraphicsResourceGetMappedPointer((void **)&deviceMem, &num_bytes, m_cuda_pixel_buffer_object);
 
-		m_usedLogic->UpdateSystem(deviceMem);
+		m_usedLogic->UpdateSystem(deviceMem, timeDifference);
 
 		cudaGraphicsUnmapResources(1, &m_cuda_pixel_buffer_object);
 
@@ -44,6 +46,10 @@ void FrameWork::RunCoreLoop()
 
 		// Swap the screen buffers
 		glfwSwapBuffers(m_window);
+
+		double currentTime = glfwGetTime();
+		timeDifference = currentTime - lastTime;
+		lastTime = currentTime;
 	}
 }
 

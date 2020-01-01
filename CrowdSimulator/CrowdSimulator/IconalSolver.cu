@@ -125,30 +125,33 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 
 
 	// We keep tack of the pixel  we are responsible for.
-	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x ;
-	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y ;
+	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
+	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
 
-	timeBuffer[0][threadIdx.x + 1][threadIdx.y + 1] = timeBuffer[1][threadIdx.x + 1][threadIdx.y + 1] = timeFieldSource[(xOrigin + 1) + (yOrigin + 1) * timeStride];
+	int xScan = threadIdx.x + 1;
+	int yScan = threadIdx.y + 1;
+
+	timeBuffer[0][xScan][yScan] = timeBuffer[1][xScan][yScan] = timeFieldSource[xOrigin  + yOrigin  * timeStride];
 
 	if (threadIdx.x == 0)
-		timeBuffer[0][threadIdx.x][threadIdx.y + 1] = timeBuffer[1][threadIdx.x][threadIdx.y + 1] = timeFieldSource[(xOrigin)+(yOrigin + 1) * timeStride];
+		timeBuffer[0][xScan - 1][yScan] = timeBuffer[1][xScan - 1][yScan] = timeFieldSource[(xOrigin - 1)+ yOrigin  * timeStride];
 	if (threadIdx.x == 31)
-		timeBuffer[0][threadIdx.x + 2][threadIdx.y + 1] = timeBuffer[1][threadIdx.x + 2][threadIdx.y + 1] = timeFieldSource[(xOrigin + 2) + (yOrigin + 1) * timeStride];
+		timeBuffer[0][xScan + 1][yScan] = timeBuffer[1][xScan + 1][yScan] = timeFieldSource[(xOrigin + 1) + yOrigin * timeStride];
 	if (threadIdx.y == 0)
-		timeBuffer[0][threadIdx.x + 1][threadIdx.y] = timeBuffer[1][threadIdx.x + 1][threadIdx.y] = timeFieldSource[(xOrigin + 1) + (yOrigin)* timeStride];
+		timeBuffer[0][xScan][yScan - 1] = timeBuffer[1][xScan][yScan - 1] = timeFieldSource[xOrigin + (yOrigin - 1) * timeStride];
 	if (threadIdx.y == 31)
-		timeBuffer[0][threadIdx.x + 1][threadIdx.y + 2] = timeBuffer[1][threadIdx.x + 1][threadIdx.y + 2] = timeFieldSource[(xOrigin + 1) + (yOrigin + 2) * timeStride];
+		timeBuffer[0][xScan][yScan + 1] = timeBuffer[1][xScan][yScan + 1] = timeFieldSource[xOrigin + (yOrigin + 1) * timeStride];
 	// Diagonal case is not used in the godunov part.
 	__syncthreads();
 
 	int sourceBuffer = 0;
-	int xScan = threadIdx.x + 1;
-	int yScan = threadIdx.y + 1;
-	float currentInverseVelocity = gCellSize / velocityField[(xOrigin + 1) + (yOrigin + 1) * velocityStride];
+	
+	float currentInverseVelocity = gCellSize / velocityField[xOrigin  + yOrigin  * velocityStride];
 	float timeEstimate = timeBuffer[sourceBuffer][xScan][yScan];
 	// Initial guess for iterations.
 	for (int count = 0; count < gBlockSize; ++count)
 	{
+
 		float u = fminf(timeBuffer[sourceBuffer][xScan + 1][yScan], timeBuffer[sourceBuffer][xScan - 1][yScan]);
 		float v = fminf(timeBuffer[sourceBuffer][xScan ][yScan + 1], timeBuffer[sourceBuffer][xScan][yScan - 1]);
 
@@ -178,7 +181,7 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 		__syncthreads();
 	}
 
-	timeFieldDestination[(xOrigin + 1) + (yOrigin + 1) * timeStride] = timeEstimate;
+	timeFieldDestination[xOrigin  + yOrigin  * timeStride] = timeEstimate;
 }
 
 

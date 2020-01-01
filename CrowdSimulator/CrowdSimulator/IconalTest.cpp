@@ -24,7 +24,7 @@ void IconalTest::PrepareTest(const char* targetFile, const char* wallFile, const
 	m_solver.PrepareSolving();
 }
 
-void IconalTest::UpdateSystem(uchar4* deviceMemory)
+void IconalTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
 {
 	size_t wallStride;
 	unsigned int* wallInformation = m_velocityManager.GetWallInformation(wallStride);

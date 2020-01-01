@@ -14,7 +14,7 @@ void FlagTest::LoadScalarPicture(const char* fileName)
 	m_scalarMemory = m_transferHelper.UploadPictureAsFloat(&m_scalarPicture, 0.0f, 0.0f, 1.0f, m_scalarStride);
 }
 
-void FlagTest::UpdateSystem(uchar4* deviceMemory)
+void FlagTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
 {
 	m_transferHelper.VisualizeScalarField(m_scalarMemory, 1.0f, m_scalarStride, deviceMemory);
 	m_transferHelper.MarcColor(m_maskMemory, m_maskStride, deviceMemory, make_uchar4(255, 255, 255, 255));

@@ -11,7 +11,7 @@ public:
 	~IsoLineTest();
 
 	void LoadScalarPicture(const char* fileName);
-	virtual void UpdateSystem(uchar4* deviceMemory);
+	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
 
 private:
 

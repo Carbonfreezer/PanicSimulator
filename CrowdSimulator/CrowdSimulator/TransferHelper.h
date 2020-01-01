@@ -24,6 +24,9 @@ public:
 	void MarcColor(unsigned int* deviceMemory,size_t devicePitch, uchar4* pixelMemory, uchar4 color);
 	// Maps the data to a blue red flow.
 	void VisualizeScalarField(float* deviceMemory, float maximumValue, size_t devicePitch, uchar4* pixelMemory);
+	// Maps the data to a blue red flow.
+	void VisualizeScalarFieldWithNegative(float* deviceMemory, float maximumValue, size_t devicePitch, uchar4* pixelMemory);
+	
 	// Visualizes some iso-lines on the indicated float memory field.
 	void VisualizeIsoLines(float* dataMemory, float isoLineStepSize, size_t rawDataStride, uchar4* pixelMemory);
 	

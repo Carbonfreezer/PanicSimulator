@@ -139,33 +139,62 @@ void TransferHelper::VisualizeScalarField(float* deviceMemory, float maximumValu
 }
 
 
+__global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue, uchar4* pixelMemory)
+{
+	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
+	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
 
 
-__global__ void GenerateLineFlags(float* dataMemory, size_t dataStride, unsigned int* isoLineFlags, size_t isoLineStride, float isoLineStepSize)
+	float candidate = deviceMemory[(baseX + 1) + devicePitch * (baseY + 1)];
+	candidate = fminf(candidate, maximumValue);
+	candidate = fmaxf(candidate, -maximumValue);
+	candidate = (candidate + maximumValue) / (2.0f * maximumValue);
+
+	unsigned char redColor = (unsigned char)(255.0f * candidate);
+	uchar4 finalColor = make_uchar4(redColor, 0, 255 - redColor, 255);
+
+	baseX *= gPixelsPerCell;
+	baseY *= gPixelsPerCell;
+
+	for (int i = 0; i < gPixelsPerCell; ++i)
+		for (int j = 0; j < gPixelsPerCell; ++j)
+			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
+}
+
+void TransferHelper::VisualizeScalarFieldWithNegative(float* deviceMemory, float maximumValue, size_t devicePitch,
+	uchar4* pixelMemory)
+{
+	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceMemory, devicePitch, maximumValue, pixelMemory);
+}
+
+
+__global__ void GenerateLineFlags(float* dataMemory, size_t dataStride, unsigned int* isoLineFlags,
+                                  size_t isoLineStride, float isoLineStepSize)
 {
 	__shared__ float valueBuffer[gBlockSize + 2][gBlockSize + 2];
 
 	
 	// We keep tack of the pixel block we are responsible for.
-	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x;   
-	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y;
-
-
-	valueBuffer[threadIdx.x + 1][threadIdx.y + 1] = dataMemory[(xOrigin + 1) + (yOrigin + 1) * dataStride ];
-	
-	if (threadIdx.x == 0)
-		valueBuffer[threadIdx.x][threadIdx.y + 1] = dataMemory[(xOrigin ) + (yOrigin + 1) * dataStride ];
-	if (threadIdx.x == 31)
-		valueBuffer[threadIdx.x + 2][threadIdx.y + 1] = dataMemory[(xOrigin + 2) + (yOrigin + 1) * dataStride ];
-	if (threadIdx.y == 0)
-		valueBuffer[threadIdx.x + 1][threadIdx.y ] = dataMemory[(xOrigin + 1) + (yOrigin ) * dataStride ];
-	if (threadIdx.y == 31)
-		valueBuffer[threadIdx.x + 1][threadIdx.y + 2] = dataMemory[(xOrigin + 1) + (yOrigin + 2) * dataStride ];
-	
-	__syncthreads();
+	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;   
+	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
 
 	int xScan = threadIdx.x + 1;
 	int yScan = threadIdx.y + 1;
+
+
+	valueBuffer[xScan][yScan] = dataMemory[xOrigin  + yOrigin  * dataStride ];
+	
+	if (threadIdx.x == 0)
+		valueBuffer[xScan - 1][yScan] = dataMemory[(xOrigin  - 1) + yOrigin  * dataStride ];
+	if (threadIdx.x == 31)
+		valueBuffer[xScan + 1][yScan] = dataMemory[(xOrigin + 1) + yOrigin  * dataStride ];
+	if (threadIdx.y == 0)
+		valueBuffer[xScan][yScan - 1 ] = dataMemory[xOrigin  + (yOrigin - 1) * dataStride ];
+	if (threadIdx.y == 31)
+		valueBuffer[xScan][yScan + 1] = dataMemory[xOrigin  + (yOrigin + 1) * dataStride ];
+	
+	__syncthreads();
+
 
 	// Get nearest iso value.
 	float localValue = valueBuffer[xScan][yScan];
@@ -185,7 +214,8 @@ __global__ void GenerateLineFlags(float* dataMemory, size_t dataStride, unsigned
 	
 }
 
-void TransferHelper::VisualizeIsoLines(float* dataMemory, float isoLineStepSize, size_t rawDataStride, uchar4* pixelMemory)
+void TransferHelper::VisualizeIsoLines(float* dataMemory, float isoLineStepSize, size_t rawDataStride,
+                                       uchar4* pixelMemory)
 {
 	if (m_isoLineData == NULL)
 		m_isoLineData = (unsigned int*)ReserveFloatMemory(m_isoLineStride);
@@ -193,6 +223,8 @@ void TransferHelper::VisualizeIsoLines(float* dataMemory, float isoLineStepSize,
 	dim3 block(32, 32);
 	dim3 grid(3, 3);
 	
-	GenerateLineFlags CUDA_DECORATOR_LOGIC(dataMemory, rawDataStride, (unsigned int *)m_isoLineData, m_isoLineStride, isoLineStepSize);
-	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int*)m_isoLineData, m_isoLineStride, pixelMemory, make_uchar4(128, 128, 128, 255));
+	GenerateLineFlags CUDA_DECORATOR_LOGIC(dataMemory, rawDataStride, (unsigned int *)m_isoLineData, m_isoLineStride,
+	                                       isoLineStepSize);
+	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int*)m_isoLineData, m_isoLineStride, pixelMemory,
+	                                   make_uchar4(128, 128, 128, 255));
 }
