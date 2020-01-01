@@ -84,12 +84,14 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ContinuityEquationTest.cpp" />
     <ClCompile Include="FlagTest.cpp" />
     <ClCompile Include="GradientTest.cpp" />
     <ClCompile Include="IconalTest.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
+    <CudaCompile Include="ContinuityEquationSolver.cu" />
     <CudaCompile Include="DensityManager.cu" />
     <CudaCompile Include="GradientModule.cu" />
     <CudaCompile Include="IconalSolver.cu" />
@@ -113,6 +115,7 @@
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GradientModule.h" />
     <ClInclude Include="GradientTest.h" />
+    <ClInclude Include="ContinuityEquationTest.h" />
     <ClInclude Include="IconalSolver.h" />
     <ClInclude Include="IconalTest.h" />
     <ClInclude Include="IsoLineTest.h" />

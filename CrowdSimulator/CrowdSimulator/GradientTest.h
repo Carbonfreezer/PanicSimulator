@@ -12,7 +12,7 @@ public:
 
 
 	// 0: x derivative, 1 : y derivative
-	void InitializeTest(const char* densityFile, const char* wallFile, int visualizationDecision);
+	void PrepareTest(const char* densityFile, const char* wallFile, int visualizationDecision);
 
 	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
 

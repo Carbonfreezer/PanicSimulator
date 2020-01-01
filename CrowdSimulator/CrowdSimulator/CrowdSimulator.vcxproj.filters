@@ -19,6 +19,9 @@
     <CudaCompile Include="GradientModule.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
+    <CudaCompile Include="ContinuityEquationSolver.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -41,6 +44,9 @@
       <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
     <ClCompile Include="GradientTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="ContinuityEquationTest.cpp">
       <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="MemoryStructs.h">
       <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="ContinuityEquationTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -59,7 +59,7 @@ FloatArray TransferHelper::UploadPictureAsFloat(TgaReader* reader, float boundar
 			if ((row != 0) && (row != gGridSizeExternal - 1) && (column != 0) && (column != gGridSizeExternal - 1))
 			{
 				destinationValue = internalPixelInformation[3 * ((column - 1) + gGridSizeInternal * (row - 1))];
-				destinationValue = minValueMapped + (maxValueMapped - minValueMapped) * destinationValue / 255;
+				destinationValue = minValueMapped + (maxValueMapped - minValueMapped) * destinationValue / 255.0f;
 			}
 			m_floatArea[column + row * gGridSizeExternal] = destinationValue;
 		}
@@ -99,6 +99,135 @@ FloatArray TransferHelper::ReserveFloatMemory()
 	return result;
 }
 
+UnsignedArray TransferHelper::ReserveUnsignedMemory()
+{
+	// Allocate device memory.
+	void* memory;
+	size_t pitch;
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+
+	// We fill all with zero at the beginnig.
+	memset(m_intArea, 0, gGridSizeExternal * gGridSizeExternal * 4);
+	cudaMemcpy2D(memory, pitch, m_intArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+
+	pitch /= 4;
+
+	UnsignedArray result;
+	result.m_array = (unsigned int*)memory;
+	result.m_stride = pitch;
+
+	return result;
+}
+
+FloatArray TransferHelper::UpfronFilledValue(float value)
+{
+	for (int row = 0; row < gGridSizeExternal; ++row)
+		for (int column = 0; column < gGridSizeExternal; ++column)
+		{
+			m_floatArea[column + row * gGridSizeExternal] = value;
+		}
+
+	// Allocate device memory.
+	void* memory;
+	size_t pitch;
+
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+
+	pitch /= 4;
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
+
+	return result;
+}
+
+FloatArray TransferHelper::BuildHorizontalGradient(float startMax, int direction)
+{
+	for (int row = 0; row < gGridSizeExternal; ++row)
+		for (int column = 0; column < gGridSizeExternal; ++column)
+		{
+			float destinationValue;
+			if (direction == 1)
+				destinationValue = startMax * ((float)column) / (gGridSizeExternal - 1);
+			else
+				destinationValue = startMax - startMax * ((float)column) / (gGridSizeExternal - 1);
+			m_floatArea[column + row * gGridSizeExternal] = destinationValue;
+		}
+
+	// Allocate device memory.
+	void* memory;
+	size_t pitch;
+
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+
+	pitch /= 4;
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
+
+	return result;
+}
+
+FloatArray TransferHelper::BuildVerticalGradient(float startMax, int direction)
+{
+	for (int row = 0; row < gGridSizeExternal; ++row)
+		for (int column = 0; column < gGridSizeExternal; ++column)
+		{
+			float destinationValue;
+			if (direction == 1)
+				destinationValue = startMax * ((float)row) / (gGridSizeExternal - 1);
+			else
+				destinationValue = startMax - startMax * ((float)row) / (gGridSizeExternal - 1);
+			m_floatArea[column + row * gGridSizeExternal] = destinationValue;
+		}
+
+	// Allocate device memory.
+	void* memory;
+	size_t pitch;
+
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+
+	pitch /= 4;
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
+
+	return result;
+}
+
+FloatArray TransferHelper::BuildRadialGradient(float startMax, int direction)
+{
+
+	float maxDistance = sqrtf(2) * gGridSizeExternal / 2.0f;
+	for (int row = 0; row < gGridSizeExternal; ++row)
+		for (int column = 0; column < gGridSizeExternal; ++column)
+		{
+			float distance = sqrtf((row - gGridSizeExternal / 2) * (row - gGridSizeExternal / 2) + (column - gGridSizeExternal / 2) * (column - gGridSizeExternal / 2));
+			distance /= maxDistance;
+			if (direction == 1)
+				distance = 1.0f - distance;
+
+			m_floatArea[column + row * gGridSizeExternal] = startMax * distance;
+		}
+
+	// Allocate device memory.
+	void* memory;
+	size_t pitch;
+
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+
+	pitch /= 4;
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
+
+	return result;
+}
+
 
 __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, uchar4* pixelMemory, uchar4 color)
 {
@@ -111,7 +240,8 @@ __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, u
 			int srcY = j + baseY;
 
 			
-			unsigned int candidate = deviceMemory[(srcX / gPixelsPerCell + 1) + devicePitch * (srcY / gPixelsPerCell + 1)];
+			unsigned int candidate = deviceMemory[(srcX / gPixelsPerCell + 1) + devicePitch * (srcY / gPixelsPerCell + 1
+			)];
 			if (candidate)
 				pixelMemory[srcX + gScreenResolution * srcY] = color;
 		
@@ -152,7 +282,8 @@ void TransferHelper::VisualizeScalarField(FloatArray deviceData, float maximumVa
 }
 
 
-__global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue, uchar4* pixelMemory)
+__global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue,
+                                            uchar4* pixelMemory)
 {
 	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
 	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
@@ -175,7 +306,7 @@ __global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePi
 }
 
 void TransferHelper::VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue, 
-	uchar4* pixelMemory)
+                                                      uchar4* pixelMemory)
 {
 	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
@@ -236,7 +367,8 @@ void TransferHelper::VisualizeIsoLines(FloatArray deviceData, float isoLineStepS
 	dim3 block(32, 32);
 	dim3 grid(3, 3);
 	
-	GenerateLineFlags CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, (unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride,
+	GenerateLineFlags CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride,
+	                                       (unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride,
 	                                       isoLineStepSize);
 	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride, pixelMemory,
 	                                   make_uchar4(128, 128, 128, 255));

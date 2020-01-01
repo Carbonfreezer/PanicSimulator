@@ -11,6 +11,11 @@ public:
 	void PreprareModule();
 	// Gets the gradient.
 	void ComputeGradient(FloatArray inputField, UnsignedArray wallField);
+	// Assumes zeroes at the undefined areas. Needed for the continuum equation and the divergence computation.
+	void ComputeGradientXForDivergence(FloatArray inputField, UnsignedArray wallField);
+	// Assumes zeroes at the undefined areas. Needed for the continuum equation and the divergence computation.
+	void ComputeGradientYForDivergence(FloatArray inputField, UnsignedArray wallField);
+
 
 	
 	FloatArray GetXComponent() { return m_gradientResultX; }	

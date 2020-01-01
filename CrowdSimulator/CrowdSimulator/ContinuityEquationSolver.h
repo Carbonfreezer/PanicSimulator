@@ -8,7 +8,9 @@ public:
 	void PrepareSolver();
 
 	// Integrate the continuity equation and modifies the density field.
-	void IntegrateEquation(float  timePassed, float* densityField, size_t densityStride, float* velocityField, size_t velocityStride, float* iconalField, size_t iconalSolution);
+	void IntegrateEquation(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, UnsignedArray wallArray);
+
+	void DebugHack(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, UnsignedArray wallArray, uchar4* pixel);
 
 private:
 	// This contains the gradient of the iconal equation.
@@ -17,5 +19,9 @@ private:
 	GradientModule m_specialXDerivative;
 	// The same for the y derivative.
 	GradientModule m_specialYDerivative;
+
+
+	// HACK HACK HACK
+	TransferHelper	m_helper;
 	
 };

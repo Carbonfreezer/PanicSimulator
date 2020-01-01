@@ -5,6 +5,7 @@
 #include "IconalTest.h"
 #include "VelocityTest.h"
 #include "GradientTest.h"
+#include "ContinuityEquationTest.h"
 
 static FrameWork gBaseFrameWork;
 static CheckerTest gChecker;
@@ -13,6 +14,7 @@ static IsoLineTest gIsoLineTest;
 static IconalTest gIconal;
 static VelocityTest gVelocity;
 static GradientTest gGradientTest;
+static ContinuityEquationTest gContinuityTest;
 
 int main(int argc, char **argv)
 {
@@ -42,7 +44,7 @@ int main(int argc, char **argv)
 	}
 	else if (argv[1][0] == '3')
 	{
-		gIsoLineTest.LoadScalarPicture("Circle.tga");
+		gIsoLineTest.LoadScalarPicture("BigCircle.tga");
 		gBaseFrameWork.InitializeFramework(&gIsoLineTest, "Isoline Test 2");
 	}
 	
@@ -156,13 +158,78 @@ int main(int argc, char **argv)
 	}
 	else if (argv[1][0] == 'L')
 	{
-		gGradientTest.InitializeTest("BigCircle.tga", "WallConvoluted.tga", 0);
+		gGradientTest.PrepareTest("BigCircle.tga", "WallConvoluted.tga", 0);
 		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 1");
 	}
 	else if (argv[1][0] == 'M')
 	{
-		gGradientTest.InitializeTest("BigCircle.tga", "WallConvoluted.tga", 1);
+		gGradientTest.PrepareTest("BigCircle.tga", "WallConvoluted.tga", 1);
 		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 2");
+	}
+	else if (argv[1][0] == 'N')
+	{
+		gContinuityTest.PrepareTest(0, "Star.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 1");
+	}
+	else if (argv[1][0] == 'O')
+	{
+		gContinuityTest.PrepareTest(1, "Star.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 2");
+	}
+	else if (argv[1][0] == 'P')
+	{
+	gContinuityTest.PrepareTest(2, "Star.tga", "Empty.tga");
+	gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 3");
+	}
+	else if (argv[1][0] == 'Q')
+	{
+	gContinuityTest.PrepareTest(3, "Star.tga", "Empty.tga");
+	gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 4");
+	}
+	else if (argv[1][0] == 'R')
+	{
+		gContinuityTest.PrepareTest(0, "CenterBlob.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 5");
+	}
+	else if (argv[1][0] == 'S')
+	{
+		gContinuityTest.PrepareTest(2, "CenterBlob.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 6");
+	}
+	else if (argv[1][0] == 'T')
+	{
+		gContinuityTest.PrepareTest(3, "TopPixelLine.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 7");
+	}
+	else if (argv[1][0] == 'U')
+	{
+		gContinuityTest.PrepareTest(0, "CenterBlob.tga", "MicroWall.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 8");
+	}
+	else if (argv[1][0] == 'V')
+	{
+		gContinuityTest.PrepareTest(1, "CenterBlob.tga", "MicroWall.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 9");
+	}
+	else if (argv[1][0] == 'W')
+	{
+		gContinuityTest.PrepareTest(2, "CenterBlob.tga", "MicroWall.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 10");
+	}
+	else if (argv[1][0] == 'X')
+	{
+		gContinuityTest.PrepareTest(3, "CenterBlob.tga", "MicroWall.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 11");
+	}
+	else if (argv[1][0] == 'Y')
+	{
+		gContinuityTest.PrepareTest(5, "CenterBlob.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 12");
+	}
+	else if (argv[1][0] == 'Z')
+	{
+		gContinuityTest.PrepareTest(4, "OuterRing.tga", "Empty.tga");
+		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 13");
 	}
 	else
 		return 0;

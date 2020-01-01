@@ -4,7 +4,7 @@
 #include <vector_functions.hpp>
 
 
-void GradientTest::InitializeTest(const char* densityFile, const char* wallFile, int visualizationDecision)
+void GradientTest::PrepareTest(const char* densityFile, const char* wallFile, int visualizationDecision)
 {
 	assert(m_wallInformation.m_array == NULL);
 	assert(m_densityInformation.m_array == NULL);
