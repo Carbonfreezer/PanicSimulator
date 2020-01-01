@@ -2,6 +2,8 @@
 #include "LogicClass.h"
 #include "TgaReader.h"
 #include "VelocityManager.h"
+#include "MemoryStructs.h"
+
 
 // Test that checks, if the density is correctly mapped to the velocity.
 class VelocityTest : public LogicClass
@@ -16,9 +18,8 @@ private:
 	VelocityManager m_velocityManager;
 	TransferHelper m_helper;
 
-	float* m_densityData;
-	size_t m_densityStride;
+	FloatArray m_densityData;
+	
 	float m_isoLineDistance;
-	;
 	
 };

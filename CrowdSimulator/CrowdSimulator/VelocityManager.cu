@@ -10,13 +10,13 @@ __constant__ float m_velocityLookupTable[12] = {1.34f, 1.23f, 1.03f, 0.77f, 0.56
 
 void VelocityManager::GenerateVelocityField()
 {
-	m_velocityField = m_helperTransfer.ReserveFloatMemory(m_velocityStride);
+	m_velocityField = m_helperTransfer.ReserveFloatMemory();
 }
 
 void VelocityManager::SetWallFile(const char* wallFilename)
 {
 	m_wallReader.ReadFile(wallFilename);
-	m_wallArea = m_helperTransfer.UploadPicture(&m_wallReader, 255, m_wallStride);
+	m_wallInformation = m_helperTransfer.UploadPicture(&m_wallReader, 255);
 }
 
 __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, float* densityField, size_t density_stride, unsigned* wallArea, size_t wallStride)
@@ -66,22 +66,23 @@ __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, floa
 	}
 }
 
-void VelocityManager::UpdateVelocityField(float* densityField, size_t densityStride)
+void VelocityManager::UpdateVelocityField(FloatArray density)
 {
-	assert(m_velocityField);
-	assert(m_wallArea);
-	UpdateVelocity CUDA_DECORATOR_LOGIC(m_velocityField, m_velocityStride, densityField, densityStride, m_wallArea, m_wallStride);
+	assert(m_velocityField.m_array);
+	assert(m_wallInformation.m_array);
+	UpdateVelocity CUDA_DECORATOR_LOGIC(m_velocityField.m_array, m_velocityField.m_stride,
+		density.m_array, density.m_stride, m_wallInformation.m_array, m_wallInformation.m_stride);
 }
 
 void VelocityManager::ApplyWallVisualization(uchar4* textureMemory, uchar4 colorToApply)
 {
-	m_helperTransfer.MarcColor(m_wallArea, m_wallStride, textureMemory, colorToApply);
+	m_helperTransfer.MarcColor(m_wallInformation, textureMemory, colorToApply);
 }
 
 void VelocityManager::GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance)
 {
-	m_helperTransfer.VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, m_velocityStride, textureMemory);
-	m_helperTransfer.VisualizeIsoLines(m_velocityField, isoLineDistance, m_velocityStride, textureMemory);
+	m_helperTransfer.VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, textureMemory);
+	m_helperTransfer.VisualizeIsoLines(m_velocityField, isoLineDistance, textureMemory);
 }
 
 

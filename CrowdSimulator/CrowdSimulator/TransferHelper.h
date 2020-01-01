@@ -1,40 +1,38 @@
 #pragma once
 #include <surface_types.h>
 #include "GlobalConstants.h"
-
+#include "MemoryStructs.h"
 
 class TgaReader;
 
 class TransferHelper
 {
 public:
-	TransferHelper() { m_isoLineData = NULL; }
 	
 	// Uploads the pictures as unsigned char array. Takes the red component. Picture must be 285 by 285. Resulting image is 287 by 287 adding the boundary structures.
-	unsigned int*  UploadPicture(TgaReader* reader, unsigned char boundaryValue, size_t& pitch);
+	UnsignedArray  UploadPicture(TgaReader* reader, unsigned char boundaryValue);
 	// Transforms all to float values.
-	float* UploadPictureAsFloat(TgaReader* reader, float boundaryValue, float minValueMapped, float maxValueMapped, size_t& pitch);
+	FloatArray UploadPictureAsFloat(TgaReader* reader, float boundaryValue, float minValueMapped, float maxValueMapped);
 	// Simply reserves some space for the processing part in floats.
-	float* ReserveFloatMemory(size_t& pitch);
+	FloatArray ReserveFloatMemory();
 
 
 	// Visualization helpers.
 	
 	// Marks the cells as being white on the texture memory.
-	void MarcColor(unsigned int* deviceMemory,size_t devicePitch, uchar4* pixelMemory, uchar4 color);
+	void MarcColor(UnsignedArray data, uchar4* pixelMemory, uchar4 color);
 	// Maps the data to a blue red flow.
-	void VisualizeScalarField(float* deviceMemory, float maximumValue, size_t devicePitch, uchar4* pixelMemory);
+	void VisualizeScalarField(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
 	// Maps the data to a blue red flow.
-	void VisualizeScalarFieldWithNegative(float* deviceMemory, float maximumValue, size_t devicePitch, uchar4* pixelMemory);
+	void VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue,  uchar4* pixelMemory);
 	
 	// Visualizes some iso-lines on the indicated float memory field.
-	void VisualizeIsoLines(float* dataMemory, float isoLineStepSize, size_t rawDataStride, uchar4* pixelMemory);
+	void VisualizeIsoLines(FloatArray deviceData, float isoLineStepSize,  uchar4* pixelMemory);
 	
 private:
 	int m_intArea[gGridSizeExternal * gGridSizeExternal];
 	float m_floatArea[gGridSizeExternal * gGridSizeExternal];
 
 	// Data on GPU for iso line buffering.
-	unsigned int* m_isoLineData;
-	size_t m_isoLineStride;
+	FloatArray m_isoLineData;
 };

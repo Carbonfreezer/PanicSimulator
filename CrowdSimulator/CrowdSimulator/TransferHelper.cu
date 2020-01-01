@@ -9,11 +9,13 @@
 #include <cstring>
 
 
-unsigned int* TransferHelper::UploadPicture(TgaReader* reader, unsigned char boundaryValue, size_t& pitch)
+UnsignedArray TransferHelper::UploadPicture(TgaReader* reader, unsigned char boundaryValue)
 {
 	assert(reader->GetWidth() == gGridSizeInternal);
 	assert(reader->GetHeight() == gGridSizeInternal);
 
+	
+	
 	unsigned char* internalPixelInformation = reader->GetPixels();
 
 	for(int row = 0; row < gGridSizeExternal; ++row)
@@ -26,20 +28,24 @@ unsigned int* TransferHelper::UploadPicture(TgaReader* reader, unsigned char bou
 		}
 
 	// Allocate device memory.
-	void* result;
+	void* memory;
+	size_t pitch;
 	
-	cudaMallocPitch(&result, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
-	cudaMemcpy2D(result, pitch, m_intArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_intArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
 
 	pitch /= 4;
-	
 
-	return (unsigned int*)result;
+	UnsignedArray result;
+	result.m_array = (unsigned int*)memory;
+	result.m_stride = pitch;
+
+	return result;
 }
 
 
-float* TransferHelper::UploadPictureAsFloat(TgaReader* reader, float boundaryValue, float minValueMapped,
-	float maxValueMapped, size_t& pitch)
+FloatArray TransferHelper::UploadPictureAsFloat(TgaReader* reader, float boundaryValue, float minValueMapped,
+	float maxValueMapped)
 {
 	assert(reader->GetWidth() == gGridSizeInternal);
 	assert(reader->GetHeight() == gGridSizeInternal);
@@ -59,31 +65,38 @@ float* TransferHelper::UploadPictureAsFloat(TgaReader* reader, float boundaryVal
 		}
 
 	// Allocate device memory.
-	void* result;
+	void* memory;
+	size_t pitch;
 
-	cudaMallocPitch(&result, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
-	cudaMemcpy2D(result, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
 
 	pitch /= 4;
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
 
-	return (float*)result;
+	return result;
 }
 
-float* TransferHelper::ReserveFloatMemory(size_t& pitch)
+FloatArray TransferHelper::ReserveFloatMemory()
 {
 	// Allocate device memory.
-	void* result;
-	cudaMallocPitch(&result, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
+	void* memory;
+	size_t pitch;
+	cudaMallocPitch(&memory, &pitch, gGridSizeExternal * 4, gGridSizeExternal);
 
 	// We fill all with zero at the beginnig.
-	void* temp = malloc(4 * gGridSizeExternal * gGridSizeExternal);
-	memset(temp, 0, gGridSizeExternal * gGridSizeExternal * 4);
-	cudaMemcpy2D(result, pitch, temp, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
-	free(temp);
+	memset(m_floatArea, 0, gGridSizeExternal * gGridSizeExternal * 4);
+	cudaMemcpy2D(memory, pitch, m_floatArea, 4 * gGridSizeExternal, 4 * gGridSizeExternal, gGridSizeExternal, cudaMemcpyHostToDevice);
 	
-
 	pitch /= 4;
-	return (float*)result;
+
+	FloatArray result;
+	result.m_array = (float*)memory;
+	result.m_stride = pitch;
+	
+	return result;
 }
 
 
@@ -106,9 +119,9 @@ __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, u
 		}
 }
 
-void TransferHelper::MarcColor(unsigned int* deviceMemory,size_t devicePitch, uchar4* pixelMemory, uchar4 color)
+void TransferHelper::MarcColor(UnsignedArray data, uchar4* pixelMemory, uchar4 color)
 {
-	MarcIfFlagged CUDA_DECORATOR_LOGIC (deviceMemory, devicePitch, pixelMemory, color);
+	MarcIfFlagged CUDA_DECORATOR_LOGIC (data.m_array, data.m_stride, pixelMemory, color);
 }
 
 
@@ -131,11 +144,11 @@ __global__ void  VisualizeField(float* deviceMemory, size_t devicePitch, float m
 			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
 }
 
-void TransferHelper::VisualizeScalarField(float* deviceMemory, float maximumValue, size_t devicePitch,
+void TransferHelper::VisualizeScalarField(FloatArray deviceData, float maximumValue, 
                                           uchar4* pixelMemory)
 {
 	
-	VisualizeField CUDA_DECORATOR_LOGIC (deviceMemory, devicePitch, maximumValue, pixelMemory);
+	VisualizeField CUDA_DECORATOR_LOGIC (deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
 
@@ -161,10 +174,10 @@ __global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePi
 			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
 }
 
-void TransferHelper::VisualizeScalarFieldWithNegative(float* deviceMemory, float maximumValue, size_t devicePitch,
+void TransferHelper::VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue, 
 	uchar4* pixelMemory)
 {
-	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceMemory, devicePitch, maximumValue, pixelMemory);
+	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
 
@@ -214,17 +227,17 @@ __global__ void GenerateLineFlags(float* dataMemory, size_t dataStride, unsigned
 	
 }
 
-void TransferHelper::VisualizeIsoLines(float* dataMemory, float isoLineStepSize, size_t rawDataStride,
+void TransferHelper::VisualizeIsoLines(FloatArray deviceData, float isoLineStepSize, 
                                        uchar4* pixelMemory)
 {
-	if (m_isoLineData == NULL)
-		m_isoLineData = (unsigned int*)ReserveFloatMemory(m_isoLineStride);
+	if (m_isoLineData.m_array == NULL)
+		m_isoLineData = ReserveFloatMemory();
 
 	dim3 block(32, 32);
 	dim3 grid(3, 3);
 	
-	GenerateLineFlags CUDA_DECORATOR_LOGIC(dataMemory, rawDataStride, (unsigned int *)m_isoLineData, m_isoLineStride,
+	GenerateLineFlags CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, (unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride,
 	                                       isoLineStepSize);
-	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int*)m_isoLineData, m_isoLineStride, pixelMemory,
+	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride, pixelMemory,
 	                                   make_uchar4(128, 128, 128, 255));
 }

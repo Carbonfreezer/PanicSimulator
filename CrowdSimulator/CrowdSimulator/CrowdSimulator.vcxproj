@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CheckerTest.h" />
+    <ClInclude Include="ContinuityEquationSolver.h" />
     <ClInclude Include="CudaHelper.h" />
     <ClInclude Include="DensityManager.h" />
     <ClInclude Include="FlagTest.h" />
@@ -116,6 +117,7 @@
     <ClInclude Include="IconalTest.h" />
     <ClInclude Include="IsoLineTest.h" />
     <ClInclude Include="LogicClass.h" />
+    <ClInclude Include="MemoryStructs.h" />
     <ClInclude Include="TgaReader.h" />
     <ClInclude Include="TransferHelper.h" />
     <ClInclude Include="VelocityManager.h" />

@@ -1,42 +1,27 @@
 #pragma once
 #include <surface_types.h>
 #include "TransferHelper.h"
+#include "MemoryStructs.h"
 
 class GradientModule
 {
 public:
-	GradientModule() { m_gradientResultX = m_gradientResultY = NULL; }
-	
+
+	// Has to be called upfront once.
 	void PreprareModule();
-
 	// Gets the gradient.
-	void ComputeGradient(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride);
-
-
-	// Selectively computes the x derivative (needed for divergence).
-	void ComputeXDerivative(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride);
-	// Same for the y derivative.
-	void ComputeYDerivative(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride);
-
+	void ComputeGradient(FloatArray inputField, UnsignedArray wallField);
 
 	
-	float* GetXComponent(size_t& stride)
-	{
-		stride = m_gradientStride;
-		return m_gradientResultX;
-	}
+	FloatArray GetXComponent() { return m_gradientResultX; }	
+	FloatArray GetYComponent() { return m_gradientResultY; }
 	
-	float* GetYComponent(size_t& stride)
-	{
-		stride = m_gradientStride;
-		return m_gradientResultY;
-	}
 
 	void VisualizeField(int component, float maxExepctedValue, uchar4* textureMemory);
 	
 private:
-	float* m_gradientResultX;
-	float* m_gradientResultY;
-	size_t m_gradientStride;
+	FloatArray m_gradientResultX;
+	FloatArray m_gradientResultY;
+
 	TransferHelper m_transferHelper;
 };

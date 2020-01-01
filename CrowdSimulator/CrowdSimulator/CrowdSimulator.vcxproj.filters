@@ -93,6 +93,12 @@
     <ClInclude Include="GradientTest.h">
       <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
+    <ClInclude Include="ContinuityEquationSolver.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryStructs.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="HeaderFiles">

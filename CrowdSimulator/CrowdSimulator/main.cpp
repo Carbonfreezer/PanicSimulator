@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 		gIconal.PrepareTest("SourceLine.tga", "WallSlit.tga", "SpawnAreaCircular.tga");
 		gIconal.SetIterations(gridIterations);
 		gIconal.SetIsoLineDistance(7.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 2");
+		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 3");
 	}
 	else if (argv[1][0] == 'J')
 	{
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 		gIconal.SetMaximumTime(300.0f);
 		
 		gIconal.SetIsoLineDistance(7.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 3");
+		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 4");
 	}
 	else if (argv[1][0] == 'K')
 	{

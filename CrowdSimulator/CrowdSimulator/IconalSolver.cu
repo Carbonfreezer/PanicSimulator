@@ -2,12 +2,17 @@
 #include "CudaHelper.h"
 #include <device_launch_parameters.h>
 #include <cmath>
+#include <cassert>
 
 
 void IconalSolver::PrepareSolving()
 {
-	for(int i = 0; i < 2; ++i)
-		m_bufferTime[i] = m_transferHelper.ReserveFloatMemory(m_timeStride);
+	assert(m_timeArray->m_array == NULL);
+
+	m_timeArray[0] = m_transferHelper.ReserveFloatMemory();
+	m_timeArray[1] = m_transferHelper.ReserveFloatMemory();
+	assert(m_timeArray[0].m_stride == m_timeArray[1].m_stride);
+	m_usedDoubleBuffer = 0;
 }
 
 
@@ -40,80 +45,6 @@ __global__ void PrepareTimeField(float* timeBuffer, size_t timeStide, unsigned* 
 		timeBuffer[xRead + yRead * timeStide] = 0.0f;
 	else
 		timeBuffer[xRead + yRead * timeStide] = INFINITY;
-
-}
-
-__global__ void RunIconalDijkstra(float* timeFieldSource, float* timeFieldDestination, size_t timeStride, float* velocityField, size_t velocityStride)
-{
-	__shared__ float timeBuffer[2][gBlockSize + 2][gBlockSize + 2];
-
-
-	// We keep tack of the pixel  we are responsible for.
-	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x;
-	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y;
-
-
-	timeBuffer[0][threadIdx.x + 1][threadIdx.y + 1] = timeBuffer[1][threadIdx.x + 1][threadIdx.y + 1] = timeFieldSource[(xOrigin + 1) + (yOrigin + 1) * timeStride];
-
-	// We do not need to copy over the boundary elements of the velocity because we will not need them.
-
-	if (threadIdx.x == 0)
-		timeBuffer[0][threadIdx.x][threadIdx.y + 1] = timeBuffer[1][threadIdx.x][threadIdx.y + 1] = timeFieldSource[(xOrigin)+(yOrigin + 1) * timeStride];
-	if (threadIdx.x == 31)
-		timeBuffer[0][threadIdx.x + 2][threadIdx.y + 1] = timeBuffer[1][threadIdx.x + 2][threadIdx.y + 1] = timeFieldSource[(xOrigin + 2) + (yOrigin + 1) * timeStride];
-	if (threadIdx.y == 0)
-		timeBuffer[0][threadIdx.x + 1][threadIdx.y] = timeBuffer[1][threadIdx.x + 1][threadIdx.y] = timeFieldSource[(xOrigin + 1) + (yOrigin)* timeStride];
-	if (threadIdx.y == 31)
-		timeBuffer[0][threadIdx.x + 1][threadIdx.y + 2] = timeBuffer[1][threadIdx.x + 1][threadIdx.y + 2] = timeFieldSource[(xOrigin + 1) + (yOrigin + 2) * timeStride];
-
-	// Special fix for the corner case. (only used in dikjstra solver because of diagonal element).
-	if ((threadIdx.x == 0) && (threadIdx.y == 0))
-	{
-		timeBuffer[0][0][0] = timeBuffer[1][0][0] = timeFieldSource[xOrigin + yOrigin * timeStride];
-		timeBuffer[0][33][0] = timeBuffer[1][33][0] = timeFieldSource[(xOrigin + gBlockSize) + yOrigin * timeStride];
-		timeBuffer[0][0][33] = timeBuffer[1][0][33] = timeFieldSource[(xOrigin)+(yOrigin + gBlockSize) * timeStride];
-		timeBuffer[0][33][33] = timeBuffer[1][33][33] = timeFieldSource[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * timeStride];
-	}
-
-
-	__syncthreads();
-
-
-
-	int sourceBuffer = 0;
-	int xScan = threadIdx.x + 1;
-	int yScan = threadIdx.y + 1;
-
-	float bestTime = timeBuffer[sourceBuffer][xScan][yScan];
-
-	float reciprocalVelocity = 1.0f / velocityField[(xOrigin + 1) + (yOrigin + 1) * velocityStride];
-	float horrizontalTime = reciprocalVelocity * gCellSize;
-	float diagonalTime = reciprocalVelocity * gCellSizeDiagonal;
-
-
-
-	// Initial guess for iterations.
-	for (int count = 0; count < gBlockSize; ++count)
-	{
-
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan - 1][yScan] + horrizontalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan + 1][yScan] + horrizontalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan][yScan - 1] + horrizontalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan][yScan + 1] + horrizontalTime);
-
-
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan - 1][yScan - 1] + diagonalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan + 1][yScan + 1] + diagonalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan + 1][yScan - 1] + diagonalTime);
-		bestTime = fminf(bestTime, timeBuffer[sourceBuffer][xScan - 1][yScan + 1] + diagonalTime);
-
-		sourceBuffer = 1 - sourceBuffer;
-		timeBuffer[sourceBuffer][xScan][yScan] = bestTime;
-
-		__syncthreads();
-	}
-
-	timeFieldDestination[(xOrigin + 1) + (yOrigin + 1) * timeStride] = bestTime;
 
 }
 
@@ -188,31 +119,23 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 
 
 
-void IconalSolver::PerformIterations(int outerIterations , float* velocityField, size_t velocityStride, unsigned int* targetAreaInformation, size_t targetAreaStride)
+void IconalSolver::PerformIterations(int outerIterations , FloatArray velocity, UnsignedArray targetArea)
 {
-	PrepareTimeField CUDA_DECORATOR_LOGIC (m_bufferTime[0], m_timeStride, targetAreaInformation, targetAreaStride);
-	PrepareTimeField CUDA_DECORATOR_LOGIC(m_bufferTime[1], m_timeStride, targetAreaInformation, targetAreaStride);
+
+	assert(m_timeArray[0].m_array);
+	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[0].m_array, m_timeArray[0].m_stride, targetArea.m_array, targetArea.m_stride);
+	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[1].m_array, m_timeArray[1].m_stride, targetArea.m_array, targetArea.m_stride);
 
 
 	// We have tu run a prestep to get the border filled.
-	int m_usedDoubleBuffer = 0;
+	m_usedDoubleBuffer = 0;
 	for (int i = 0; i < outerIterations; ++i)
 	{
-		// RunIconalDijkstra CUDA_DECORATOR_LOGIC(m_bufferTime[m_usedDoubleBuffer], m_bufferTime[1 - m_usedDoubleBuffer], m_timeStride, velocityField, velocityStride);
-		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_bufferTime[m_usedDoubleBuffer], m_bufferTime[1 - m_usedDoubleBuffer], m_timeStride, velocityField, velocityStride);
+		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[m_usedDoubleBuffer].m_array, m_timeArray[1 - m_usedDoubleBuffer].m_array, m_timeArray[0].m_stride,
+			velocity.m_array, velocity.m_stride);
 		m_usedDoubleBuffer = 1 - m_usedDoubleBuffer;
 	}
-	
 
-	
-
-}
-
-float* IconalSolver::GetTimeField(size_t& timeStride)
-{
-	
-	timeStride = m_timeStride;
-	return m_bufferTime[m_usedDoubleBuffer];
 }
 
 

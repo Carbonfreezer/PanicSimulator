@@ -5,25 +5,17 @@
 #include <device_launch_parameters.h>
 #include <math.h>
 
-DensityManager::DensityManager()
-{
-	m_targetAreaData = NULL;
-	m_spawnAreaData = NULL;
-	m_densityBuffer[0] = m_densityBuffer[1] = NULL;
-	m_doubleBufferDensity = 0;
-}
 
 void DensityManager::InitializeManager(const char* spawnAreaFile, const char* targetAreaFile)
 {
-	assert(m_targetAreaData == NULL);
+	assert(m_targetArea.m_array == NULL);
 
 	m_targetAreaReader.ReadFile(targetAreaFile);
 	m_spawnAreaReader.ReadFile(spawnAreaFile);
 
-	m_spawnAreaData = m_transferHelper.UploadPictureAsFloat(&m_spawnAreaReader, 0.0f, 0.0f, gMaximumDensity, m_spawnAreaStride);
-	m_targetAreaData = m_transferHelper.UploadPicture(&m_targetAreaReader, 0, m_targetAreaStride);
-	m_densityBuffer[0] = m_transferHelper.ReserveFloatMemory(m_densityStride);
-	m_densityBuffer[1] = m_transferHelper.ReserveFloatMemory(m_densityStride);
+	m_spawnArea = m_transferHelper.UploadPictureAsFloat(&m_spawnAreaReader, 0.0f, 0.0f, gMaximumDensity);
+	m_targetArea = m_transferHelper.UploadPicture(&m_targetAreaReader, 0);
+	m_density = m_transferHelper.ReserveFloatMemory();
 }
 
 __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsigned* wallInformaton, size_t strideWall, float* spawnArea, size_t strideSpawn,
@@ -69,13 +61,14 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsi
 
 }
 
-void DensityManager::EnforceBoundaryConditions(unsigned* wallInformation, size_t wallStride)
+void DensityManager::EnforceBoundaryConditions(UnsignedArray wallInformation)
 {
-	ApplyConditions  CUDA_DECORATOR_LOGIC (m_densityBuffer[m_doubleBufferDensity], m_densityStride, wallInformation, wallStride,
-		m_spawnAreaData, m_spawnAreaStride, m_targetAreaData, m_targetAreaStride);
+	assert(m_targetArea.m_array);
+	ApplyConditions  CUDA_DECORATOR_LOGIC (m_density.m_array, m_density.m_stride, wallInformation.m_array, wallInformation.m_stride,
+		m_spawnArea.m_array, m_spawnArea.m_stride, m_targetArea.m_array, m_targetArea.m_stride);
 }
 
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {
-	m_transferHelper.VisualizeScalarField(m_densityBuffer[m_doubleBufferDensity], gMaximumDensity, m_densityStride, textureMemory);
+	m_transferHelper.VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
 }

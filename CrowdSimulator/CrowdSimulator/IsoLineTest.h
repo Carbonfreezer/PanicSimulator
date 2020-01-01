@@ -2,6 +2,7 @@
 #include "LogicClass.h"
 #include "TransferHelper.h"
 #include "TgaReader.h"
+#include  "MemoryStructs.h"
 
 class IsoLineTest :
 	public LogicClass
@@ -17,8 +18,7 @@ private:
 
 	TgaReader m_scalarPicture;
 	TransferHelper m_transferHelper;
-	float* m_scalarMemory;
-	size_t m_scalarStride;
+	FloatArray m_scalarMemory;
 	
 };
 
