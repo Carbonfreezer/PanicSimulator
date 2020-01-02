@@ -35,3 +35,12 @@
 
 // The maximum density in peoples / sqm.
 #define gMaximumDensity 5.5f
+
+// The maximum step size we tolerate for the continuity solver.
+#define gMaximumStepsizeContinuitySolver 0.010f
+
+// The maximum error we tolerate on a per pixel basis.
+#define  gMaximalGodunovError 1.0f
+
+// The maximum double iterations we intend to cover.
+#define gMaximumIterationsGodunov 100

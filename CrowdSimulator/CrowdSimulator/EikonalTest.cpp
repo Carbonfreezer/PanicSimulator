@@ -17,7 +17,7 @@ void EikonalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, 
 	m_velocityManager.UpdateVelocityField(densityField,dataBase);
 
 	FloatArray velocityField = m_velocityManager.GetVelocityField();
-	m_solver.PerformIterations(m_numOfGridIterations, velocityField,  dataBase);
+	m_solver.PerformIterations( velocityField,  dataBase);
 	
 	
 	FloatArray timeField = m_solver.GetTimeField();

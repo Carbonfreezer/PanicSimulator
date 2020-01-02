@@ -22,5 +22,9 @@ private:
 	GradientModule m_specialXDerivative;
 	// The same for the y derivative.
 	GradientModule m_specialYDerivative;
+
+	// The array with the premultiplied gradient.
+	FloatArray m_premultipliedGradientX;
+	FloatArray m_premultipliedGradientY;
 	
 };

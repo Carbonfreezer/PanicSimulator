@@ -13,7 +13,6 @@ void EikonalSolver::PrepareSolving()
 	m_timeArray[0] = TransferHelper::ReserveFloatMemory();
 	m_timeArray[1] = TransferHelper::ReserveFloatMemory();
 	assert(m_timeArray[0].m_stride == m_timeArray[1].m_stride);
-	m_usedDoubleBuffer = 0;
 }
 
 
@@ -50,11 +49,40 @@ __global__ void PrepareTimeField(float* timeBuffer, size_t timeStide, unsigned* 
 }
 
 
+__device__ int gHasConverged;
+
+__device__ int gBlocksCountedForConvergence;
+__device__ int gBlocksHaveConverged;
+// __device__ int gNumChecks;
+
+
+__global__ void ResetConvergence()
+{
+	gHasConverged = 0;
+	gBlocksCountedForConvergence = 0;
+	gBlocksHaveConverged = 0;
+	// gNumChecks = 0;
+}
+
 
 __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestination, size_t timeStride, float* velocityField, size_t velocityStride)
 {
+	// Once we have found a convergence we can quit.
+	if (gHasConverged)
+		return;
+	
 	__shared__ float timeBuffer[2][gBlockSize + 2][gBlockSize + 2];
 
+	__shared__ int verifiedThreads;
+	__shared__ int convergedThreads;
+
+
+	// Needed for the convergence check.
+	if ((threadIdx.x == 0) && (threadIdx.y == 0))
+	{
+		verifiedThreads = 0;
+		convergedThreads = 0;
+	}
 
 	// We keep tack of the pixel  we are responsible for.
 	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
@@ -80,6 +108,7 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 	
 	float currentInverseVelocity = gCellSize / velocityField[xOrigin  + yOrigin  * velocityStride];
 	float timeEstimate = timeBuffer[sourceBuffer][xScan][yScan];
+	float valueOriginal = timeEstimate;
 	// Initial guess for iterations.
 	for (int count = 0; count < gBlockSize; ++count)
 	{
@@ -113,28 +142,68 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 		__syncthreads();
 	}
 
+
 	timeFieldDestination[xOrigin  + yOrigin  * timeStride] = timeEstimate;
+
+	// We do the convergence check herer.
+	int converged = 0;
+
+	if (isinf(valueOriginal) && isinf(timeEstimate))
+		converged = 1;
+	else if (isfinite(valueOriginal) && isfinite(timeEstimate))
+		converged = fabsf(valueOriginal - timeEstimate) < gMaximalGodunovError;
+
+	atomicAdd(&convergedThreads, converged);
+	int threadsProcessed = atomicAdd(&verifiedThreads, 1) + 1;
+
+	// When we are not the last thread we are done here.
+	if (threadsProcessed != gBlockSize * gBlockSize)
+		return;
+
+	int blockHasConverged = (convergedThreads == gBlockSize * gBlockSize);
+	atomicAdd(&gBlocksHaveConverged, blockHasConverged) + blockHasConverged;
+
+	int blocksProcessed = atomicAdd(&gBlocksCountedForConvergence, 1) + 1;
+	if (blocksProcessed != gNumOfBlocks * gNumOfBlocks)
+		return;
+
+	// Now we are the last thread of the last block;
+	gHasConverged = (gBlocksHaveConverged == gNumOfBlocks * gNumOfBlocks);
+
+
+	/*
+	gNumChecks += 1;
+	if (gHasConverged)
+		gHasConverged = gHasConverged;
+	*/
+	
+	gBlocksCountedForConvergence = 0;
+	gBlocksHaveConverged = 0;
+
+	
 }
 
 
 
 
-
-void EikonalSolver::PerformIterations(int outerIterations , FloatArray velocity, DataBase* dataBase)
+void EikonalSolver::PerformIterations( FloatArray velocity, DataBase* dataBase)
 {
 
 	assert(m_timeArray[0].m_array);
 	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[0].m_array, m_timeArray[0].m_stride, dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
 	TransferHelper::CopyDataFromTo(m_timeArray[0], m_timeArray[1]);
 
-
+	ResetConvergence << <1, 1 >> > ();
+	
+	
 	// We have tu run a prestep to get the border filled.
-	m_usedDoubleBuffer = 0;
-	for (int i = 0; i < outerIterations; ++i)
+	for (int i = 0; i < gMaximumIterationsGodunov; ++i)
 	{
-		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[m_usedDoubleBuffer].m_array, m_timeArray[1 - m_usedDoubleBuffer].m_array, m_timeArray[0].m_stride,
+		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[0].m_array, m_timeArray[1 ].m_array, m_timeArray[0].m_stride,
 			velocity.m_array, velocity.m_stride);
-		m_usedDoubleBuffer = 1 - m_usedDoubleBuffer;
+		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[1].m_array, m_timeArray[0].m_array, m_timeArray[0].m_stride,
+			velocity.m_array, velocity.m_stride);
+		// VerifyConvergence CUDA_DECORATOR_LOGIC(m_timeArray[0].m_array, m_timeArray[1].m_array, m_timeArray[0].m_stride);
 	}
 
 }

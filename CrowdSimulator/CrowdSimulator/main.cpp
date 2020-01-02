@@ -19,8 +19,7 @@ static GradientTest gGradientTest;
 static ContinuityEquationTest gContinuityTest;
 
 int main(int argc, char **argv)
-{
-
+{	
 	// The title for the test,
 	const char* title = "Missing title";
 	LogicClass* usedLogic = NULL;
@@ -112,7 +111,6 @@ int main(int argc, char **argv)
 		title = "Eikonal Test 11";
 		usedLogic = &gIconal;
 		gIconal.SetMaximumTime(300.0f);
-		gIconal.SetIterations(60);
 		fileNames.m_targetFile = "SourceLine.tga";
 		fileNames.m_wallFile = "WallConvoluted.tga";
 		break;
@@ -152,7 +150,6 @@ int main(int argc, char **argv)
 	case 'J':
 		title = "Eikonal Density 4";
 		usedLogic = &gIconal;
-		gIconal.SetIterations(60);
 		gIconal.SetMaximumTime(300.0f);
 		gIconal.SetIsoLineDistance(7.0f);
 		fileNames.m_targetFile = "SourceLine.tga";

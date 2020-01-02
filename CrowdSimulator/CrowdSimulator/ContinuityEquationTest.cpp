@@ -1,6 +1,5 @@
 #include "ContinuityEquationTest.h"
 #include "DataBase.h"
-#include <cmath>
 #include "VisualizationHelper.h"
 
 void ContinuityEquationTest::PrepareTest(int eikonalMode)

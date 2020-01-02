@@ -20,14 +20,13 @@ public:
 	void PrepareSolving();
 
 	// Performs n iteration steps.
-	void PerformIterations(int outerIterations, FloatArray velocityField, DataBase* dataBase );
+	void PerformIterations(FloatArray velocityField, DataBase* dataBase );
 
 	// Asks for the time field.
-	FloatArray GetTimeField() { return m_timeArray[m_usedDoubleBuffer]; }
+	FloatArray GetTimeField() { return m_timeArray[0]; }
 
 private:
 	// Which double buffer do we use?
-	int m_usedDoubleBuffer;
 	FloatArray m_timeArray[2];
 
 };
