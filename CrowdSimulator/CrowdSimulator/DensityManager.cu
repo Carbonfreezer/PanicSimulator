@@ -4,18 +4,13 @@
 #include <cassert>
 #include <device_launch_parameters.h>
 #include <math.h>
+#include "DataBase.h"
 
 
-void DensityManager::InitializeManager(const char* spawnAreaFile, const char* targetAreaFile)
+void DensityManager::InitializeManager(DataBase* dataBase)
 {
-	assert(m_targetArea.m_array == NULL);
-
-	m_targetAreaReader.ReadFile(targetAreaFile);
-	m_spawnAreaReader.ReadFile(spawnAreaFile);
-
-	m_spawnArea = m_transferHelper.UploadPictureAsFloat(&m_spawnAreaReader, 0.0f, 0.0f, gMaximumDensity);
-	m_targetArea = m_transferHelper.UploadPicture(&m_targetAreaReader, 0);
 	m_density = m_transferHelper.ReserveFloatMemory();
+	m_transferHelper.CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
 }
 
 __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsigned* wallInformaton, size_t strideWall, float* spawnArea, size_t strideSpawn,
@@ -61,12 +56,15 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsi
 
 }
 
-void DensityManager::EnforceBoundaryConditions(UnsignedArray wallInformation)
+void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 {
-	assert(m_targetArea.m_array);
-	ApplyConditions  CUDA_DECORATOR_LOGIC (m_density.m_array, m_density.m_stride, wallInformation.m_array, wallInformation.m_stride,
-		m_spawnArea.m_array, m_spawnArea.m_stride, m_targetArea.m_array, m_targetArea.m_stride);
+	ApplyConditions  CUDA_DECORATOR_LOGIC (m_density.m_array, m_density.m_stride,
+		dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
+		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
+		dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride);
 }
+
+
 
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {

@@ -1,16 +1,15 @@
 #include "VelocityTest.h"
+#include "DataBase.h"
 
-void VelocityTest::PrepareTest(const char* densityFile, const char* wallFile, float isoLineDistance)
+
+void VelocityTest::ToolSystem(DataBase* dataBase)
 {
-	m_densityFile.ReadFile(densityFile);
-	m_densityData = m_helper.UploadPictureAsFloat(&m_densityFile, 0.0f, 0.0f, gMaximumDensity);
-	m_velocityManager.SetWallFile(wallFile);
 	m_velocityManager.GenerateVelocityField();
-	m_isoLineDistance = isoLineDistance;
 }
 
-void VelocityTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
+void VelocityTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_velocityManager.UpdateVelocityField(m_densityData);
-	m_velocityManager.GenerateVelocityVisualization(deviceMemory, m_isoLineDistance);
+	// We can take the initial density here, because it is not updated.
+	m_velocityManager.UpdateVelocityField(dataBase->GetInitialDensityData(), dataBase);
+	m_velocityManager.GenerateVelocityVisualization(deviceMemory, gMaximumWalkingVelocity / m_strideOnGradient);
 }

@@ -6,7 +6,7 @@ class CheckerTest :
 public:
 
 	CheckerTest() : m_updateCounter(0) {}
-	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
+	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
 
 private:
 

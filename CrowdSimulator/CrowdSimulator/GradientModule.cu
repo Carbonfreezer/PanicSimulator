@@ -1,6 +1,7 @@
 #include "GradientModule.h"
 #include "GlobalConstants.h"
 #include "CudaHelper.h"
+#include "DataBase.h"
 #include <cassert>
 #include <device_launch_parameters.h>
 #include <math.h>
@@ -95,11 +96,11 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	
 }
 
-void GradientModule::ComputeGradient(FloatArray inputField, UnsignedArray wallField)
+void GradientModule::ComputeGradient(FloatArray inputField, DataBase* dataBase)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCuda CUDA_DECORATOR_LOGIC (inputField.m_array, inputField.m_stride, wallField.m_array, wallField.m_stride, 
+	ComputeGradientCuda CUDA_DECORATOR_LOGIC (inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride, 
 		m_gradientResultX.m_array, m_gradientResultY.m_array, m_gradientResultX.m_stride);
 }
 
@@ -168,11 +169,11 @@ __global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputSt
 
 
 
-void GradientModule::ComputeGradientXForDivergence(FloatArray inputField, UnsignedArray wallField)
+void GradientModule::ComputeGradientXForDivergence(FloatArray inputField, DataBase* dataBase)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCudaXDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, wallField.m_array, wallField.m_stride,
+	ComputeGradientCudaXDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
 		m_gradientResultX.m_array,  m_gradientResultX.m_stride);
 }
 
@@ -237,11 +238,11 @@ __global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputSt
 }
 
 
-void GradientModule::ComputeGradientYForDivergence(FloatArray inputField, UnsignedArray wallField)
+void GradientModule::ComputeGradientYForDivergence(FloatArray inputField, DataBase* dataBase)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCudaYDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, wallField.m_array, wallField.m_stride,
+	ComputeGradientCudaYDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
 		m_gradientResultY.m_array, m_gradientResultX.m_stride);
 }
 

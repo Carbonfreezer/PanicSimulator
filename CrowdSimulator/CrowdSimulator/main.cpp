@@ -6,8 +6,10 @@
 #include "VelocityTest.h"
 #include "GradientTest.h"
 #include "ContinuityEquationTest.h"
+#include <cassert>
 
 static FrameWork gBaseFrameWork;
+
 static CheckerTest gChecker;
 static FlagTest gFlagTest;
 static IsoLineTest gIsoLineTest;
@@ -18,225 +20,244 @@ static ContinuityEquationTest gContinuityTest;
 
 int main(int argc, char **argv)
 {
-	cudaDeviceProp prop;
-	cudaGetDeviceProperties(&prop, 0);
 
-
-	const int gridIterations = 25;
+	// The title for the test,
+	const char* title = "Missing title";
+	LogicClass* usedLogic = NULL;
+	BaseFileNames fileNames;
 	
 	if (argc != 2)
 		return 0;
 
-	if (argv[1][0] == '0')
+	switch(argv[1][0])
 	{
-		gBaseFrameWork.InitializeFramework(&gChecker, "Checker Test");
-	}
-	else if (argv[1][0] == '1')
-	{
-		gFlagTest.LoadFlagPicture("Picture.tga");
-		gFlagTest.LoadScalarPicture("Gradient.tga");
-		gBaseFrameWork.InitializeFramework(&gFlagTest, "Visualization Test");
-	}
-	else if (argv[1][0] == '2')
-	{
-		gIsoLineTest.LoadScalarPicture("Gradient.tga");
-		gBaseFrameWork.InitializeFramework(&gIsoLineTest, "Isoline Test 1");
-	}
-	else if (argv[1][0] == '3')
-	{
-		gIsoLineTest.LoadScalarPicture("BigCircle.tga");
-		gBaseFrameWork.InitializeFramework(&gIsoLineTest, "Isoline Test 2");
+	case '0':
+		title = "Checker Test";
+		usedLogic = &gChecker;
+		break;
+	case '1':
+		title = "Visualization Test";
+		usedLogic = &gFlagTest;
+		fileNames.m_wallFile = "Picture.tga";
+		fileNames.m_initialDensityFile = "Gradient.tga";
+		break;
+	case '2':
+		title = "Iso Line Test 1";
+		usedLogic = &gIsoLineTest;
+		fileNames.m_initialDensityFile = "Gradient.tga";
+		break;
+	case '3':
+		title = "Iso Line Test 2";
+		usedLogic = &gIsoLineTest;
+		fileNames.m_initialDensityFile = "BigCircle.tga";
+		break;
+	case '4':
+		title = "Eikonal Test 1";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourcePoint.tga";
+		break;
+	case '5':
+		title = "Eikonal Test 2";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourcePoint.tga";
+		fileNames.m_wallFile = "WallComplex.tga";
+		break;
+	case '6':
+		title = "Eikonal Test 3";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceLine.tga";
+		break;
+	case '7':
+		title = "Eikonal Test 4";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallSlit.tga";
+		break;
+	case '8':
+		title = "Eikonal Test 5";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallDoubleSlit.tga";
+		break;
+	case '9':
+		title = "Eikonal Test 6";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallComplex.tga";
+		break;
+	case 'A':
+		title = "Eikonal Test 7";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceDoublePoint.tga";
+		break;
+	case 'B':
+		title = "Eikonal Test 8";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceDoublePoint.tga";
+		fileNames.m_wallFile = "WallSlit.tga";
+		break;
+	case 'C':
+		title = "Eikonal Test 9";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceDoublePoint.tga";
+		fileNames.m_wallFile = "WallDoubleSlit.tga";
+		break;
+	case 'D':
+		title = "Eikonal Test 10";
+		usedLogic = &gIconal;
+		fileNames.m_targetFile = "SourceDoublePoint.tga";
+		fileNames.m_wallFile = "WallComplex.tga";
+		break;
+	case 'E':
+		title = "Eikonal Test 11";
+		usedLogic = &gIconal;
+		gIconal.SetMaximumTime(300.0f);
+		gIconal.SetIterations(60);
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallConvoluted.tga";
+		break;
+	case 'F':
+		title = "Velocity Test 1";
+		usedLogic = &gVelocity;
+		fileNames.m_wallFile = "WallComplex.tga";
+		fileNames.m_initialDensityFile = "HorrGradient.tga";
+		break;
+	case 'G':
+		title = "Eikonal Density 1";
+		usedLogic = &gIconal;
+		gIconal.SetIsoLineDistance(5.0f);
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallSlit.tga";
+		fileNames.m_initialDensityFile = "SpawnAreaSimple.tga";
+		break;
+
+	case 'H':
+		title = "Eikonal Density 2";
+		usedLogic = &gIconal;
+		gIconal.SetIsoLineDistance(5.0f);
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallSlit.tga";
+		fileNames.m_initialDensityFile = "SpawnAreaSimple2.tga";
+		break;
+
+	case 'I':
+		title = "Eikonal Density 3";
+		usedLogic = &gIconal;
+		gIconal.SetIsoLineDistance(7.0f);
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallSlit.tga";
+		fileNames.m_initialDensityFile = "SpawnAreaCircular.tga";
+		break;
+
+	case 'J':
+		title = "Eikonal Density 4";
+		usedLogic = &gIconal;
+		gIconal.SetIterations(60);
+		gIconal.SetMaximumTime(300.0f);
+		gIconal.SetIsoLineDistance(7.0f);
+		fileNames.m_targetFile = "SourceLine.tga";
+		fileNames.m_wallFile = "WallConvoluted.tga";
+		fileNames.m_initialDensityFile = "SpawnAreaCircular.tga";
+		break;
+	case 'K':
+		title = "Velocity Test 2";
+		gVelocity.SetStridesOnGradient(5);
+		usedLogic = &gVelocity;
+		fileNames.m_wallFile = "WallConvoluted.tga";
+		fileNames.m_initialDensityFile = "SpawnAreaCircular.tga";
+		break;
+	case 'L':
+		title = "Gradient Test 1";
+		usedLogic = &gGradientTest;
+		gGradientTest.PrepareTest(0);
+		fileNames.m_wallFile = "WallConvoluted.tga";
+		break;
+	case 'M':
+		title = "Gradient Test 2";
+		usedLogic = &gGradientTest;
+		gGradientTest.PrepareTest(1);
+		fileNames.m_wallFile = "WallConvoluted.tga";
+		break;
+	case 'N':
+		title = "Continuity Test 1";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(0);
+		fileNames.m_initialDensityFile = "Star.tga";
+		break;
+	case 'O':
+		title = "Continuity Test 2";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(1);
+		fileNames.m_initialDensityFile = "Star.tga";
+		break;
+	case 'P':
+		title = "Continuity Test 3";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(2);
+		fileNames.m_initialDensityFile = "Star.tga";
+		break;
+	case 'Q':
+		title = "Continuity Test 4";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(3);
+		fileNames.m_initialDensityFile = "Star.tga";
+		break;
+	case 'R':
+		title = "Continuity Test 5";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(0);
+		fileNames.m_initialDensityFile = "CenterBlob.tga";
+		fileNames.m_wallFile = "MicroWall.tga";
+		break;
+	case 'S':
+		title = "Continuity Test 6";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(1);
+		fileNames.m_initialDensityFile = "CenterBlob.tga";
+		fileNames.m_wallFile = "MicroWall.tga";
+		break;
+	case 'T':
+		title = "Continuity Test 7";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(2);
+		fileNames.m_initialDensityFile = "CenterBlob.tga";
+		fileNames.m_wallFile = "MicroWall.tga";
+		break;
+	case 'U':
+		title = "Continuity Test 8";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(3);
+		fileNames.m_initialDensityFile = "CenterBlob.tga";
+		fileNames.m_wallFile = "MicroWall.tga";
+		break;
+	case 'V':
+		title = "Continuity Test 9";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(3);
+		fileNames.m_initialDensityFile = "TopPixelLine.tga";
+		break;
+	case 'W':
+		title = "Continuity Test 10";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(5);
+		fileNames.m_initialDensityFile = "CenterBlob.tga";
+		break;
+	case 'X':
+		title = "Continuity Test 11";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(4);
+		fileNames.m_initialDensityFile = "OuterRing.tga";
+		break;
+
 	}
 	
-	else if (argv[1][0] == '4')
-	{
-		gIconal.PrepareTest("SourcePoint.tga", "Empty.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test 1");
-	}
-	else if (argv[1][0] == '5')
-	{
-		gIconal.PrepareTest("SourcePoint.tga", "WallComplex.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test 2");
-	}
-	else if (argv[1][0] == '6')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "Empty.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 3");
-	}
-	else if (argv[1][0] == '7')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallSlit.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 4");
-	}
-	else if (argv[1][0] == '8')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallDoubleSlit.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 5");
-	}
-	else if (argv[1][0] == '9')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallComplex.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 6");
-	}
-	else if (argv[1][0] == 'A')
-	{
-		gIconal.PrepareTest("SourceDoublePoint.tga", "Empty.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 7");
-	}
-	else if (argv[1][0] == 'B')
-	{
-		gIconal.PrepareTest("SourceDoublePoint.tga", "WallSlit.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 8");
-	}
-	else if (argv[1][0] == 'C')
-	{
-		gIconal.PrepareTest("SourceDoublePoint.tga", "WallDoubleSlit.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 9");
-	}
-	else if (argv[1][0] == 'D')
-	{
-		gIconal.PrepareTest("SourceDoublePoint.tga", "WallComplex.tga");
-		gIconal.SetIterations(gridIterations);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 10");
-	}
-	else if (argv[1][0] == 'E')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallConvoluted.tga");
-		gIconal.SetIterations(60);
-		gIconal.SetMaximumTime(300.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "EikonalTest 11");
-	}
-	else if (argv[1][0] == 'F')
-	{
-		gVelocity.PrepareTest("HorrGradient.tga", "WallComplex.tga", 0.03f);
-		gBaseFrameWork.InitializeFramework(&gVelocity, "Velocity Test");
-	}
-	else if (argv[1][0] == 'G')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallSlit.tga", "SpawnAreaSimple.tga");
-		gIconal.SetIterations(gridIterations);
-		gIconal.SetIsoLineDistance(5.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 1");
-	}
-	else if (argv[1][0] == 'H')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallSlit.tga", "SpawnAreaSimple2.tga");
-		gIconal.SetIterations(gridIterations);
-		gIconal.SetIsoLineDistance(5.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 2");
-	}
-	else if (argv[1][0] == 'I')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallSlit.tga", "SpawnAreaCircular.tga");
-		gIconal.SetIterations(gridIterations);
-		gIconal.SetIsoLineDistance(7.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 3");
-	}
-	else if (argv[1][0] == 'J')
-	{
-		gIconal.PrepareTest("SourceLine.tga", "WallConvoluted.tga", "SpawnAreaCircular.tga");
 
-		gIconal.SetIterations(60);
-		gIconal.SetMaximumTime(300.0f);
-		
-		gIconal.SetIsoLineDistance(7.0f);
-		gBaseFrameWork.InitializeFramework(&gIconal, "Eikonal Test Density 4");
-	}
-	else if (argv[1][0] == 'K')
-	{
-		gVelocity.PrepareTest("SpawnAreaCircular.tga", "WallConvoluted.tga", 0.2f);
-		gBaseFrameWork.InitializeFramework(&gVelocity, "Velocity Test 2");
-	}
-	else if (argv[1][0] == 'L')
-	{
-		gGradientTest.PrepareTest("BigCircle.tga", "WallConvoluted.tga", 0);
-		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 1");
-	}
-	else if (argv[1][0] == 'M')
-	{
-		gGradientTest.PrepareTest("BigCircle.tga", "WallConvoluted.tga", 1);
-		gBaseFrameWork.InitializeFramework(&gGradientTest, "Gradient Test 2");
-	}
-	else if (argv[1][0] == 'N')
-	{
-		gContinuityTest.PrepareTest(0, "Star.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 1");
-	}
-	else if (argv[1][0] == 'O')
-	{
-		gContinuityTest.PrepareTest(1, "Star.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 2");
-	}
-	else if (argv[1][0] == 'P')
-	{
-	gContinuityTest.PrepareTest(2, "Star.tga", "Empty.tga");
-	gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 3");
-	}
-	else if (argv[1][0] == 'Q')
-	{
-	gContinuityTest.PrepareTest(3, "Star.tga", "Empty.tga");
-	gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 4");
-	}
-	else if (argv[1][0] == 'R')
-	{
-		gContinuityTest.PrepareTest(0, "CenterBlob.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 5");
-	}
-	else if (argv[1][0] == 'S')
-	{
-		gContinuityTest.PrepareTest(2, "CenterBlob.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 6");
-	}
-	else if (argv[1][0] == 'T')
-	{
-		gContinuityTest.PrepareTest(3, "TopPixelLine.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 7");
-	}
-	else if (argv[1][0] == 'U')
-	{
-		gContinuityTest.PrepareTest(0, "CenterBlob.tga", "MicroWall.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 8");
-	}
-	else if (argv[1][0] == 'V')
-	{
-		gContinuityTest.PrepareTest(1, "CenterBlob.tga", "MicroWall.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 9");
-	}
-	else if (argv[1][0] == 'W')
-	{
-		gContinuityTest.PrepareTest(2, "CenterBlob.tga", "MicroWall.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 10");
-	}
-	else if (argv[1][0] == 'X')
-	{
-		gContinuityTest.PrepareTest(3, "CenterBlob.tga", "MicroWall.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 11");
-	}
-	else if (argv[1][0] == 'Y')
-	{
-		gContinuityTest.PrepareTest(5, "CenterBlob.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 12");
-	}
-	else if (argv[1][0] == 'Z')
-	{
-		gContinuityTest.PrepareTest(4, "OuterRing.tga", "Empty.tga");
-		gBaseFrameWork.InitializeFramework(&gContinuityTest, "ContinuityTest 13");
-	}
-	else
+
+	assert(usedLogic);
+	if (usedLogic == NULL)
 		return 0;
 	
-
-	
-	
+	gBaseFrameWork.InitializeFramework(usedLogic, title, fileNames);	
 	gBaseFrameWork.RunCoreLoop();
 	gBaseFrameWork.ShutdownFramework();
 	return 0;

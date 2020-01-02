@@ -3,14 +3,18 @@
 // Float array as used on the graphics card.
 struct FloatArray
 {
-	FloatArray() : m_array(NULL), m_stride(0){}
+	FloatArray();
+	void FreeArray();
+
 	float* m_array;
 	size_t m_stride;
 };
 
 struct UnsignedArray
 {
-	UnsignedArray() : m_array(NULL), m_stride(0){}
+	UnsignedArray();
+	void FreeArray();
+	
 	unsigned int* m_array;
 	size_t m_stride;
 };

@@ -1,26 +1,22 @@
 #include "GradientTest.h"
+#include "DataBase.h"
 #include <cassert>
 #include <cmath>
 #include <vector_functions.hpp>
 
 
-void GradientTest::PrepareTest(const char* densityFile, const char* wallFile, int visualizationDecision)
+void GradientTest::PrepareTest(int visualizationDecision)
 {
-	assert(m_wallInformation.m_array == NULL);
 	assert(m_densityInformation.m_array == NULL);
 	m_visualizationDecision = visualizationDecision;
 
-	m_wallReader.ReadFile(wallFile);
-	m_wallInformation = m_helper.UploadPicture(&m_wallReader, 0);
-
-	m_densityReader.ReadFile(densityFile);
-	m_densityInformation = m_helper.UploadPictureAsFloat(&m_densityReader, INFINITY, 0.0f, 100.0f);
+	m_densityInformation = m_helper.BuildRadialGradient(100.0f, 0);
 
 	m_gradientModule.PreprareModule();
 }
 
-void GradientTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
+void GradientTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_gradientModule.ComputeGradient(m_densityInformation, m_wallInformation);
+	m_gradientModule.ComputeGradient(m_densityInformation, dataBase);
 	m_gradientModule.VisualizeField(m_visualizationDecision, 3.0f, deviceMemory);
 }

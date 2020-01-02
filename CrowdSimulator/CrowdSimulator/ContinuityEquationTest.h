@@ -5,23 +5,25 @@
 #include "ContinuityEquationSolver.h"
 
 
+
+/**
+ * \brief Uses the Density data and Wall data.
+ */
 class ContinuityEquationTest : public LogicClass
 {
 public:
-	void PrepareTest(int eikonalMode, const char* densityFile, const char* wallFile);
+	void PrepareTest(int eikonalMode);
 
-	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
+	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
+
+	virtual void ToolSystem(DataBase* dataBase);
 
 	
 private:
-	TgaReader m_densityFile;
-	TgaReader m_wallFile;
 	
-
 	FloatArray m_pseudoIconalData;
-	FloatArray m_densityData;
 	FloatArray m_velocityData;
-	UnsignedArray m_wallData;
+	FloatArray m_densityData;
 	
 	TransferHelper m_helper;
 	ContinuityEquationSolver m_solver;

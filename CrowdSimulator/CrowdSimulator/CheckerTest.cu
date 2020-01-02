@@ -32,11 +32,9 @@ __global__ void GenerateStructure(uchar4* deviceMemory, int pixelExtension, unsi
 	
 }
 
-void CheckerTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
+void CheckerTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	m_updateCounter += 1;
-	
-
 	
 	GenerateStructure CUDA_DECORATOR_SCREEN (deviceMemory, gScreenResolution, m_updateCounter);
 	

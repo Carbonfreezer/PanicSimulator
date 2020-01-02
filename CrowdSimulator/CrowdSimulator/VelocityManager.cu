@@ -3,6 +3,7 @@
 #include "CudaHelper.h"
 #include <device_launch_parameters.h>
 #include <math.h>
+#include "DataBase.h"
 
 
 // Contains the movmement velocity in m/s from 0 Persons / sqm to 5.5 persons / sqm in 0.5 steps.
@@ -13,11 +14,6 @@ void VelocityManager::GenerateVelocityField()
 	m_velocityField = m_helperTransfer.ReserveFloatMemory();
 }
 
-void VelocityManager::SetWallFile(const char* wallFilename)
-{
-	m_wallReader.ReadFile(wallFilename);
-	m_wallInformation = m_helperTransfer.UploadPicture(&m_wallReader, 255);
-}
 
 __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, float* densityField, size_t density_stride, unsigned* wallArea, size_t wallStride)
 {
@@ -52,7 +48,7 @@ __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, floa
 	else
 	{
 		float density = densityField[xRead + yRead * density_stride];
-		if (density >= 5.5f)
+		if (density >= gMaximumDensity)
 		{
 			velocityField[xRead + yRead * velocityStride] = 0.0f;
 		}
@@ -66,18 +62,13 @@ __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, floa
 	}
 }
 
-void VelocityManager::UpdateVelocityField(FloatArray density)
+void VelocityManager::UpdateVelocityField(FloatArray density, DataBase* dataBase)
 {
 	assert(m_velocityField.m_array);
-	assert(m_wallInformation.m_array);
 	UpdateVelocity CUDA_DECORATOR_LOGIC(m_velocityField.m_array, m_velocityField.m_stride,
-		density.m_array, density.m_stride, m_wallInformation.m_array, m_wallInformation.m_stride);
+		density.m_array, density.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride);
 }
 
-void VelocityManager::ApplyWallVisualization(uchar4* textureMemory, uchar4 colorToApply)
-{
-	m_helperTransfer.MarcColor(m_wallInformation, textureMemory, colorToApply);
-}
 
 void VelocityManager::GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance)
 {

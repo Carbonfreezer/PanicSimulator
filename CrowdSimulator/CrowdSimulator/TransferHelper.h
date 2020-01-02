@@ -8,6 +8,10 @@ class TgaReader;
 class TransferHelper
 {
 public:
+
+	//
+	// Generating initial data fields.
+	// 
 	
 	// Uploads the pictures as unsigned char array. Takes the red component. Picture must be 285 by 285. Resulting image is 287 by 287 adding the boundary structures.
 	UnsignedArray  UploadPicture(TgaReader* reader, unsigned char boundaryValue);
@@ -39,6 +43,10 @@ public:
 	void VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue,  uchar4* pixelMemory);
 	// Visualizes some iso-lines on the indicated float memory field.
 	void VisualizeIsoLines(FloatArray deviceData, float isoLineStepSize,  uchar4* pixelMemory);
+
+
+	// Copys float data from to on the GPU.
+	void CopyDataFromTo(FloatArray source, FloatArray destination);
 	
 private:
 	int m_intArea[gGridSizeExternal * gGridSizeExternal];

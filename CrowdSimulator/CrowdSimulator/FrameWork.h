@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cuda_gl_interop.h>
+
+#include "DataBase.h"
 class LogicClass;
 
 class FrameWork
@@ -11,7 +13,7 @@ class FrameWork
 public:
 
 
-	void InitializeFramework(LogicClass* usedLogic, const char* windowTitle);
+	void InitializeFramework(LogicClass* usedLogic, const char* windowTitle, BaseFileNames fileNames);
 	void RunCoreLoop();
 	void ShutdownFramework();
 
@@ -21,6 +23,7 @@ private:
 	GLFWwindow *m_window;
 
 	LogicClass* m_usedLogic;
+	DataBase m_usedDataBase;
 
 
 	void InitializeGLEWandGLFW(const char* windowTitle);

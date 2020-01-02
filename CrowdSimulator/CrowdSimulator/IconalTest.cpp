@@ -1,41 +1,23 @@
 #include "IconalTest.h"
+#include "DataBase.h"
 #include <vector_functions.hpp>
 
 
-void IconalTest::PrepareTest(const char* targetFile, const char* wallFile)
+void IconalTest::ToolSystem(DataBase* dataBase)
 {
-	m_numOfGridIterations = 0;
-	m_velocityManager.SetWallFile(wallFile);
 	m_velocityManager.GenerateVelocityField();
-
-	m_densityManager.InitializeManager("Empty.tga", targetFile);
-
+	m_densityManager.InitializeManager(dataBase);
 	m_solver.PrepareSolving();
 }
 
-void IconalTest::PrepareTest(const char* targetFile, const char* wallFile, const char* spawnFile)
+void IconalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_numOfGridIterations = 0;
-	m_velocityManager.SetWallFile(wallFile);
-	m_velocityManager.GenerateVelocityField();
-
-	m_densityManager.InitializeManager(spawnFile, targetFile);
-
-	m_solver.PrepareSolving();
-}
-
-void IconalTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
-{
-	UnsignedArray wallInformation = m_velocityManager.GetWallInformation();
-	m_densityManager.EnforceBoundaryConditions(wallInformation);
+	m_densityManager.EnforceBoundaryConditions(dataBase);
 	FloatArray densityField = m_densityManager.GetDensityField();
-	
-
-	m_velocityManager.UpdateVelocityField(densityField);
+	m_velocityManager.UpdateVelocityField(densityField,dataBase);
 
 	FloatArray velocityField = m_velocityManager.GetVelocityField();
-	UnsignedArray targetArea = m_densityManager.GetTargetArea();
-	m_solver.PerformIterations(m_numOfGridIterations, velocityField,  targetArea);
+	m_solver.PerformIterations(m_numOfGridIterations, velocityField,  dataBase);
 	
 	
 	FloatArray timeField = m_solver.GetTimeField();

@@ -3,6 +3,15 @@
 #include "TransferHelper.h"
 #include "MemoryStructs.h"
 
+class DataBase;
+
+/**
+ * \brief Computes the gradient. For the full gradient it assumes right sided / left sided or
+ * up and down difference quotient in the border cases. In the divergence cases it uses the minimum of this
+ * and assuming zero for the border in central difference quotient.
+ *
+ * Wall information is used.
+ */
 class GradientModule
 {
 public:
@@ -10,11 +19,11 @@ public:
 	// Has to be called upfront once.
 	void PreprareModule();
 	// Gets the gradient.
-	void ComputeGradient(FloatArray inputField, UnsignedArray wallField);
+	void ComputeGradient(FloatArray inputField, DataBase* dataBase);
 	// Assumes zeroes at the undefined areas. Needed for the continuum equation and the divergence computation.
-	void ComputeGradientXForDivergence(FloatArray inputField, UnsignedArray wallField);
+	void ComputeGradientXForDivergence(FloatArray inputField, DataBase* dataBase);
 	// Assumes zeroes at the undefined areas. Needed for the continuum equation and the divergence computation.
-	void ComputeGradientYForDivergence(FloatArray inputField, UnsignedArray wallField);
+	void ComputeGradientYForDivergence(FloatArray inputField, DataBase* dataBase);
 
 
 	

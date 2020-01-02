@@ -45,10 +45,10 @@ __global__ void IntegrateEuler(float timePassed, float* density, size_t densityS
 }
 
 void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray density, FloatArray velocity,
-	FloatArray timeToDestination, UnsignedArray wallArray)
+	FloatArray timeToDestination, DataBase* dataBase)
 {
 	// First we need the gradient of the iconal equation.
-	m_gradientIconal.ComputeGradient(timeToDestination, wallArray);
+	m_gradientIconal.ComputeGradient(timeToDestination, dataBase);
 
 	// Now we have to multiply both components by density and velocity squared.
 	FloatArray gradX = m_gradientIconal.GetXComponent();
@@ -58,8 +58,8 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray de
 	InplaceMultiply CUDA_DECORATOR_LOGIC (gradX.m_array, gradY.m_array, gradX.m_stride, density.m_array, density.m_stride, velocity.m_array, velocity.m_stride);
 
 	// Now we can compute the gradients of both fields needed for the final integration step.
-	m_specialXDerivative.ComputeGradientXForDivergence(gradX, wallArray);
-	m_specialYDerivative.ComputeGradientYForDivergence(gradY, wallArray);
+	m_specialXDerivative.ComputeGradientXForDivergence(gradX, dataBase);
+	m_specialYDerivative.ComputeGradientYForDivergence(gradY, dataBase);
 
 	// We need the x component of the x derivative and the y component of the y derivative.
 	FloatArray xComponent = m_specialXDerivative.GetXComponent();

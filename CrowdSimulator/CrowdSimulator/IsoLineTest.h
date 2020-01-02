@@ -4,21 +4,18 @@
 #include "TgaReader.h"
 #include  "MemoryStructs.h"
 
-class IsoLineTest :
-	public LogicClass
+/**
+ * \brief Uses density data.
+ */
+class IsoLineTest : public LogicClass
 {
 public:
-	IsoLineTest();
-	~IsoLineTest();
 
-	void LoadScalarPicture(const char* fileName);
-	virtual void UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds);
+	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
 
 private:
 
-	TgaReader m_scalarPicture;
 	TransferHelper m_transferHelper;
-	FloatArray m_scalarMemory;
 	
 };
 

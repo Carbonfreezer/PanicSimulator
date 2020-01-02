@@ -1,6 +1,11 @@
 #pragma once
 #include "GradientModule.h"
+class DataBase;
 
+/**
+ * \brief Solves the continuity equation over time.
+ * It uses the wall information.
+ */
 class ContinuityEquationSolver
 {
 public:
@@ -8,9 +13,7 @@ public:
 	void PrepareSolver();
 
 	// Integrate the continuity equation and modifies the density field.
-	void IntegrateEquation(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, UnsignedArray wallArray);
-
-	void DebugHack(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, UnsignedArray wallArray, uchar4* pixel);
+	void IntegrateEquation(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, DataBase* dataBase);
 
 private:
 	// This contains the gradient of the iconal equation.
@@ -19,9 +22,5 @@ private:
 	GradientModule m_specialXDerivative;
 	// The same for the y derivative.
 	GradientModule m_specialYDerivative;
-
-
-	// HACK HACK HACK
-	TransferHelper	m_helper;
 	
 };

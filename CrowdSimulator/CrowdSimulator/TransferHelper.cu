@@ -205,7 +205,7 @@ FloatArray TransferHelper::BuildRadialGradient(float startMax, int direction)
 	for (int row = 0; row < gGridSizeExternal; ++row)
 		for (int column = 0; column < gGridSizeExternal; ++column)
 		{
-			float distance = sqrtf((row - gGridSizeExternal / 2) * (row - gGridSizeExternal / 2) + (column - gGridSizeExternal / 2) * (column - gGridSizeExternal / 2));
+			float distance = sqrtf((float)((row - gGridSizeExternal / 2) * (row - gGridSizeExternal / 2) + (column - gGridSizeExternal / 2) * (column - gGridSizeExternal / 2)));
 			distance /= maxDistance;
 			if (direction == 1)
 				distance = 1.0f - distance;
@@ -251,6 +251,7 @@ __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, u
 
 void TransferHelper::MarcColor(UnsignedArray data, uchar4* pixelMemory, uchar4 color)
 {
+	assert(data.m_array);
 	MarcIfFlagged CUDA_DECORATOR_LOGIC (data.m_array, data.m_stride, pixelMemory, color);
 }
 
@@ -277,7 +278,7 @@ __global__ void  VisualizeField(float* deviceMemory, size_t devicePitch, float m
 void TransferHelper::VisualizeScalarField(FloatArray deviceData, float maximumValue, 
                                           uchar4* pixelMemory)
 {
-	
+	assert(deviceData.m_array);
 	VisualizeField CUDA_DECORATOR_LOGIC (deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
@@ -308,6 +309,7 @@ __global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePi
 void TransferHelper::VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue, 
                                                       uchar4* pixelMemory)
 {
+	assert(deviceData.m_array);
 	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
@@ -361,15 +363,57 @@ __global__ void GenerateLineFlags(float* dataMemory, size_t dataStride, unsigned
 void TransferHelper::VisualizeIsoLines(FloatArray deviceData, float isoLineStepSize, 
                                        uchar4* pixelMemory)
 {
+
+	assert(deviceData.m_array);
+	
 	if (m_isoLineData.m_array == NULL)
 		m_isoLineData = ReserveFloatMemory();
 
-	dim3 block(32, 32);
-	dim3 grid(3, 3);
-	
 	GenerateLineFlags CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride,
 	                                       (unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride,
 	                                       isoLineStepSize);
 	MarcIfFlagged CUDA_DECORATOR_LOGIC((unsigned int *)(m_isoLineData.m_array), m_isoLineData.m_stride, pixelMemory,
 	                                   make_uchar4(128, 128, 128, 255));
+}
+
+__global__ void CopyData(float* sourceArray, size_t sourceStride, float* destinationArray, size_t destinationStride)
+{
+	int baseX = (threadIdx.x + blockIdx.x * blockDim.x) + 1;
+	int baseY = (threadIdx.y + blockIdx.y * blockDim.y) + 1;
+
+	destinationArray[baseX + baseY * destinationStride] = sourceArray[baseX + baseY * sourceStride];
+
+	// Here we have to deal with the boundaries.
+	if (baseX == 1)
+	{
+		destinationArray[baseY * destinationStride] = sourceArray[ baseY * sourceStride];
+	}
+	if (baseY == 1)
+	{
+		destinationArray[baseX ] = sourceArray[baseX ];
+	}
+	if (baseX == gGridSizeExternal - 2)
+	{
+		destinationArray[(gGridSizeExternal - 1) + baseY * destinationStride] = sourceArray[(gGridSizeExternal - 1) + baseY * sourceStride];
+	}
+	if (baseY == gGridSizeExternal - 2)
+	{
+		destinationArray[baseX + (gGridSizeExternal - 1) * destinationStride] = sourceArray[baseX + (gGridSizeExternal - 1) * sourceStride];
+	}
+
+	// The 4 corner cases.
+	if ((baseX == 1) && (baseY == 1))
+	{
+		destinationArray[0] = sourceArray[0];
+		destinationArray[gGridSizeExternal - 1] = sourceArray[gGridSizeExternal - 1];
+		destinationArray[(gGridSizeExternal - 1) * destinationStride] = sourceArray[(gGridSizeExternal - 1) * sourceStride];
+		destinationArray[(gGridSizeExternal - 1) + (gGridSizeExternal - 1) * destinationStride] = sourceArray[(gGridSizeExternal - 1) + (gGridSizeExternal - 1) * sourceStride];
+	}
+}
+
+void TransferHelper::CopyDataFromTo(FloatArray source, FloatArray destination)
+{
+	assert(source.m_array);
+	assert(destination.m_array);
+	CopyData CUDA_DECORATOR_LOGIC (source.m_array, source.m_stride, destination.m_array, destination.m_stride);
 }

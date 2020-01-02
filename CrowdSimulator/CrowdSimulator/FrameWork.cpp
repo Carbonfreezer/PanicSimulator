@@ -6,12 +6,15 @@
 
 
 
-void FrameWork::InitializeFramework(LogicClass* usedLogic, const char* windowTitle)
+void FrameWork::InitializeFramework(LogicClass* usedLogic, const char* windowTitle, BaseFileNames fileNames)
 {
 	m_usedLogic = usedLogic;
 
 	InitializeGLEWandGLFW(windowTitle);
 	InitializeCUDAndOpenGL();
+
+	m_usedDataBase.LoadFiles(fileNames);
+	usedLogic->ToolSystem(&m_usedDataBase);
 
 }
 
@@ -31,7 +34,7 @@ void FrameWork::RunCoreLoop()
 		cudaGraphicsMapResources(1, &m_cuda_pixel_buffer_object);
 		cudaGraphicsResourceGetMappedPointer((void **)&deviceMem, &num_bytes, m_cuda_pixel_buffer_object);
 
-		m_usedLogic->UpdateSystem(deviceMem, timeDifference);
+		m_usedLogic->UpdateSystem(deviceMem, (float)timeDifference, &m_usedDataBase);
 
 		cudaGraphicsUnmapResources(1, &m_cuda_pixel_buffer_object);
 
@@ -55,6 +58,7 @@ void FrameWork::RunCoreLoop()
 
 void FrameWork::ShutdownFramework()
 {
+	m_usedDataBase.FreeResources();
 	cudaDeviceReset();
 	glfwTerminate();
 	

@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="IconalSolver.cu">
-      <Filter>SourceFiles</Filter>
-    </CudaCompile>
     <CudaCompile Include="VelocityManager.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
@@ -20,6 +17,9 @@
       <Filter>SourceFiles</Filter>
     </CudaCompile>
     <CudaCompile Include="ContinuityEquationSolver.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
+    <CudaCompile Include="EikonalSolver.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -49,11 +49,14 @@
     <ClCompile Include="ContinuityEquationTest.cpp">
       <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryStructs.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="DataBase.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IconalSolver.h">
-      <Filter>HeaderFiles</Filter>
-    </ClInclude>
     <ClInclude Include="VelocityManager.h">
       <Filter>HeaderFiles</Filter>
     </ClInclude>
@@ -64,9 +67,6 @@
       <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
     <ClInclude Include="CheckerTest.h">
-      <Filter>HeaderFiles\TestClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="LogicClass.h">
       <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
     <ClInclude Include="FlagTest.h">
@@ -107,6 +107,18 @@
     </ClInclude>
     <ClInclude Include="ContinuityEquationTest.h">
       <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="DataBase.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFileNames.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicClass.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="EikonalSolver.h">
+      <Filter>HeaderFiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

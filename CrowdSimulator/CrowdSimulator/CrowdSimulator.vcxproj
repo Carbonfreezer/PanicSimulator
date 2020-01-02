@@ -85,16 +85,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ContinuityEquationTest.cpp" />
+    <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="FlagTest.cpp" />
     <ClCompile Include="GradientTest.cpp" />
     <ClCompile Include="IconalTest.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
+    <ClCompile Include="MemoryStructs.cpp" />
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
     <CudaCompile Include="ContinuityEquationSolver.cu" />
     <CudaCompile Include="DensityManager.cu" />
     <CudaCompile Include="GradientModule.cu" />
-    <CudaCompile Include="IconalSolver.cu" />
+    <CudaCompile Include="EikonalSolver.cu" />
     <CudaCompile Include="TransferHelper.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
@@ -106,9 +108,11 @@
     <CudaCompile Include="VelocityManager.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseFileNames.h" />
     <ClInclude Include="CheckerTest.h" />
     <ClInclude Include="ContinuityEquationSolver.h" />
     <ClInclude Include="CudaHelper.h" />
+    <ClInclude Include="DataBase.h" />
     <ClInclude Include="DensityManager.h" />
     <ClInclude Include="FlagTest.h" />
     <ClInclude Include="FrameWork.h" />
@@ -116,7 +120,7 @@
     <ClInclude Include="GradientModule.h" />
     <ClInclude Include="GradientTest.h" />
     <ClInclude Include="ContinuityEquationTest.h" />
-    <ClInclude Include="IconalSolver.h" />
+    <ClInclude Include="EikonalSolver.h" />
     <ClInclude Include="IconalTest.h" />
     <ClInclude Include="IsoLineTest.h" />
     <ClInclude Include="LogicClass.h" />

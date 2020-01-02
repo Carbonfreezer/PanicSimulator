@@ -1,7 +1,8 @@
 #include "ContinuityEquationTest.h"
+#include "DataBase.h"
 #include <cmath>
 
-void ContinuityEquationTest::PrepareTest(int eikonalMode, const char* densityFile, const char* wallFile)
+void ContinuityEquationTest::PrepareTest(int eikonalMode)
 {
 	m_solver.PrepareSolver();
 
@@ -29,21 +30,20 @@ void ContinuityEquationTest::PrepareTest(int eikonalMode, const char* densityFil
 		break;
 	}
 	
-	
-	m_densityFile.ReadFile(densityFile);
-	m_densityData = m_helper.UploadPictureAsFloat(&m_densityFile, 0.0f, 0.0f, gMaximumDensity);
-
-
 	m_velocityData = m_helper.UpfronFilledValue(gMaximumWalkingVelocity);
+	m_densityData = m_helper.ReserveFloatMemory();
 
-	m_wallFile.ReadFile(wallFile);
-
-	m_wallData = m_helper.UploadPicture(&m_wallFile,0);
 }
 
-void ContinuityEquationTest::UpdateSystem(uchar4* deviceMemory, double timePassedInSeconds)
+void ContinuityEquationTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_solver.IntegrateEquation((float)timePassedInSeconds, m_densityData, m_velocityData, m_pseudoIconalData, m_wallData);
+	m_solver.IntegrateEquation(timePassedInSeconds, m_densityData, m_velocityData, m_pseudoIconalData, dataBase);
 	m_helper.VisualizeScalarField(m_densityData, gMaximumDensity, deviceMemory);
+}
+
+void ContinuityEquationTest::ToolSystem(DataBase* dataBase)
+{
+	// Copy over the density data.
+	m_helper.CopyDataFromTo(dataBase->GetInitialDensityData(), m_densityData);
 }
 
