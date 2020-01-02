@@ -5,12 +5,13 @@
 #include <device_launch_parameters.h>
 #include <math.h>
 #include "DataBase.h"
+#include "VisualizationHelper.h"
 
 
 void DensityManager::InitializeManager(DataBase* dataBase)
 {
-	m_density = m_transferHelper.ReserveFloatMemory();
-	m_transferHelper.CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
+	m_density = TransferHelper::ReserveFloatMemory();
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
 }
 
 __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsigned* wallInformaton, size_t strideWall, float* spawnArea, size_t strideSpawn,
@@ -68,5 +69,5 @@ void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {
-	m_transferHelper.VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
+	VisualizationHelper::VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
 }

@@ -1,10 +1,10 @@
 #include "IsoLineTest.h"
 #include "DataBase.h"
-
+#include "VisualizationHelper.h"
 
 
 void IsoLineTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_transferHelper.VisualizeScalarField(dataBase->GetInitialDensityData(), gMaximumDensity, deviceMemory);
-	m_transferHelper.VisualizeIsoLines(dataBase->GetInitialDensityData(), gMaximumDensity / 15.0f,  deviceMemory);
+	VisualizationHelper::VisualizeScalarField(dataBase->GetInitialDensityData(), gMaximumDensity, deviceMemory);
+	m_visualizer.VisualizeIsoLines(dataBase->GetInitialDensityData(), gMaximumDensity / 15.0f,  deviceMemory);
 }

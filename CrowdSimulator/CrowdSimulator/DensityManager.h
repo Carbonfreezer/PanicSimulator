@@ -36,7 +36,4 @@ private:
 
 	FloatArray m_density;
 	
-	TransferHelper m_transferHelper;
-
-	
 };

@@ -22,13 +22,13 @@
     <CudaCompile Include="EikonalSolver.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
+    <CudaCompile Include="VisualizationHelper.cu">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="FlagTest.cpp">
-      <Filter>SourceFiles\TestClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="IconalTest.cpp">
       <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
     <ClCompile Include="IsoLineTest.cpp">
@@ -55,13 +55,13 @@
     <ClCompile Include="DataBase.cpp">
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </ClCompile>
+    <ClCompile Include="EikonalTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VelocityManager.h">
       <Filter>HeaderFiles</Filter>
-    </ClInclude>
-    <ClInclude Include="IconalTest.h">
-      <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
     <ClInclude Include="IsoLineTest.h">
       <Filter>HeaderFiles\TestClasses</Filter>
@@ -119,6 +119,12 @@
     </ClInclude>
     <ClInclude Include="EikonalSolver.h">
       <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="EikonalTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualizationHelper.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

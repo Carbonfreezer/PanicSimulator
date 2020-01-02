@@ -1,16 +1,16 @@
-#include "IconalTest.h"
+#include "EikonalTest.h"
 #include "DataBase.h"
 #include <vector_functions.hpp>
 
 
-void IconalTest::ToolSystem(DataBase* dataBase)
+void EikonalTest::ToolSystem(DataBase* dataBase)
 {
 	m_velocityManager.GenerateVelocityField();
 	m_densityManager.InitializeManager(dataBase);
 	m_solver.PrepareSolving();
 }
 
-void IconalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
+void EikonalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	m_densityManager.EnforceBoundaryConditions(dataBase);
 	FloatArray densityField = m_densityManager.GetDensityField();
@@ -22,6 +22,6 @@ void IconalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, D
 	
 	FloatArray timeField = m_solver.GetTimeField();
 
-	m_visualizer.VisualizeScalarField(timeField, m_maximumTime, deviceMemory);
+	VisualizationHelper::VisualizeScalarField(timeField, m_maximumTime, deviceMemory);
 	m_visualizer.VisualizeIsoLines(timeField, m_isoLineDistance,  deviceMemory);
 }

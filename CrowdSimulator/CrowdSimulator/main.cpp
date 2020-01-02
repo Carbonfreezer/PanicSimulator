@@ -2,7 +2,7 @@
 #include "CheckerTest.h"
 #include "FlagTest.h"
 #include "IsoLineTest.h"
-#include "IconalTest.h"
+#include "EikonalTest.h"
 #include "VelocityTest.h"
 #include "GradientTest.h"
 #include "ContinuityEquationTest.h"
@@ -13,7 +13,7 @@ static FrameWork gBaseFrameWork;
 static CheckerTest gChecker;
 static FlagTest gFlagTest;
 static IsoLineTest gIsoLineTest;
-static IconalTest gIconal;
+static EikonalTest gIconal;
 static VelocityTest gVelocity;
 static GradientTest gGradientTest;
 static ContinuityEquationTest gContinuityTest;

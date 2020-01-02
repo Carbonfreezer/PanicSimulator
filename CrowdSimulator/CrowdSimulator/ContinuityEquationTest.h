@@ -25,7 +25,6 @@ private:
 	FloatArray m_velocityData;
 	FloatArray m_densityData;
 	
-	TransferHelper m_helper;
 	ContinuityEquationSolver m_solver;
 
 	

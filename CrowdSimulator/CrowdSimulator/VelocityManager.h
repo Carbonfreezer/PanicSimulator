@@ -2,6 +2,7 @@
 #include <surface_types.h>
 #include "TransferHelper.h"
 #include "MemoryStructs.h"
+#include "VisualizationHelper.h"
 
 class DataBase;
 
@@ -31,6 +32,6 @@ public:
 	
 private:
 	FloatArray m_velocityField;
+	VisualizationHelper m_visualizer;
 
-	TransferHelper m_helperTransfer;
 };

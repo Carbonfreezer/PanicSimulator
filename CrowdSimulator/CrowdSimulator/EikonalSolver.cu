@@ -10,8 +10,8 @@ void EikonalSolver::PrepareSolving()
 {
 	assert(m_timeArray->m_array == NULL);
 
-	m_timeArray[0] = m_transferHelper.ReserveFloatMemory();
-	m_timeArray[1] = m_transferHelper.ReserveFloatMemory();
+	m_timeArray[0] = TransferHelper::ReserveFloatMemory();
+	m_timeArray[1] = TransferHelper::ReserveFloatMemory();
 	assert(m_timeArray[0].m_stride == m_timeArray[1].m_stride);
 	m_usedDoubleBuffer = 0;
 }
@@ -125,7 +125,7 @@ void EikonalSolver::PerformIterations(int outerIterations , FloatArray velocity,
 
 	assert(m_timeArray[0].m_array);
 	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[0].m_array, m_timeArray[0].m_stride, dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
-	m_transferHelper.CopyDataFromTo(m_timeArray[0], m_timeArray[1]);
+	TransferHelper::CopyDataFromTo(m_timeArray[0], m_timeArray[1]);
 
 
 	// We have tu run a prestep to get the border filled.

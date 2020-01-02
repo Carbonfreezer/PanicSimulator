@@ -34,10 +34,10 @@ UnsignedArray DataBase::DefaultLoadUnsigned(const char* fileName)
 	if (fileName != NULL)
 	{
 		m_reader.ReadFile(fileName);
-		return m_helper.UploadPicture(&m_reader, 0);
+		return TransferHelper::UploadPicture(&m_reader, 0);
 	}
 
-	return m_helper.ReserveUnsignedMemory();
+	return TransferHelper::ReserveUnsignedMemory();
 }
 
 FloatArray DataBase::DefaultLoadFloat(const char* fileName)
@@ -45,8 +45,8 @@ FloatArray DataBase::DefaultLoadFloat(const char* fileName)
 	if (fileName != NULL)
 	{
 		m_reader.ReadFile(fileName);
-		return m_helper.UploadPictureAsFloat(&m_reader, 0.0f, 0.0f, gMaximumDensity);
+		return TransferHelper::UploadPictureAsFloat(&m_reader, 0.0f, 0.0f, gMaximumDensity);
 	}
 
-	return m_helper.ReserveFloatMemory();
+	return TransferHelper::ReserveFloatMemory();
 }

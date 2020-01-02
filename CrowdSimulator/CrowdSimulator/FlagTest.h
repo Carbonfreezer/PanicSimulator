@@ -11,7 +11,5 @@ public:
 
 	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
 
-private:
-	TransferHelper m_transferHelper;
 };
 

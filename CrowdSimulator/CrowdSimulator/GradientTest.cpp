@@ -10,7 +10,7 @@ void GradientTest::PrepareTest(int visualizationDecision)
 	assert(m_densityInformation.m_array == NULL);
 	m_visualizationDecision = visualizationDecision;
 
-	m_densityInformation = m_helper.BuildRadialGradient(100.0f, 0);
+	m_densityInformation = TransferHelper::BuildRadialGradient(100.0f, 0);
 
 	m_gradientModule.PreprareModule();
 }

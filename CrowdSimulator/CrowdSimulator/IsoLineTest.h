@@ -1,8 +1,7 @@
 #pragma once
 #include "LogicClass.h"
 #include "TransferHelper.h"
-#include "TgaReader.h"
-#include  "MemoryStructs.h"
+#include "VisualizationHelper.h"
 
 /**
  * \brief Uses density data.
@@ -14,8 +13,6 @@ public:
 	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
 
 private:
-
-	TransferHelper m_transferHelper;
-	
+	VisualizationHelper m_visualizer;
 };
 

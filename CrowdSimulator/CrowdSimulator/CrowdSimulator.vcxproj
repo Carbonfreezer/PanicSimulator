@@ -88,7 +88,7 @@
     <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="FlagTest.cpp" />
     <ClCompile Include="GradientTest.cpp" />
-    <ClCompile Include="IconalTest.cpp" />
+    <ClCompile Include="EikonalTest.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
     <ClCompile Include="MemoryStructs.cpp" />
     <ClCompile Include="TgaReader.cpp" />
@@ -106,6 +106,7 @@
     <ClCompile Include="FrameWork.cpp" />
     <ClCompile Include="main.cpp" />
     <CudaCompile Include="VelocityManager.cu" />
+    <CudaCompile Include="VisualizationHelper.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseFileNames.h" />
@@ -121,7 +122,7 @@
     <ClInclude Include="GradientTest.h" />
     <ClInclude Include="ContinuityEquationTest.h" />
     <ClInclude Include="EikonalSolver.h" />
-    <ClInclude Include="IconalTest.h" />
+    <ClInclude Include="EikonalTest.h" />
     <ClInclude Include="IsoLineTest.h" />
     <ClInclude Include="LogicClass.h" />
     <ClInclude Include="MemoryStructs.h" />
@@ -129,6 +130,7 @@
     <ClInclude Include="TransferHelper.h" />
     <ClInclude Include="VelocityManager.h" />
     <ClInclude Include="VelocityTest.h" />
+    <ClInclude Include="VisualizationHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

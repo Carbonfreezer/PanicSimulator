@@ -25,8 +25,7 @@ private:
 	bool m_alreadyLoaded;
 
 	TgaReader m_reader;
-	TransferHelper m_helper;
-
+	
 	FloatArray m_initialDensityData;
 	FloatArray m_spawnData;
 

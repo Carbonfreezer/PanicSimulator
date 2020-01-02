@@ -21,6 +21,5 @@ public:
 
 private:
 	VelocityManager m_velocityManager;
-	TransferHelper m_helper;
 	int m_strideOnGradient;
 };

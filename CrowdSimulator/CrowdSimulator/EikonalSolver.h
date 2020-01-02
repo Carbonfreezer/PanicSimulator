@@ -30,5 +30,4 @@ private:
 	int m_usedDoubleBuffer;
 	FloatArray m_timeArray[2];
 
-	TransferHelper m_transferHelper;
 };

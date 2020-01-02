@@ -18,8 +18,7 @@ public:
 	virtual void UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase);
 
 private:
-	TransferHelper m_helper;
-
+	
 	FloatArray m_densityInformation;
 	int m_visualizationDecision;
 	

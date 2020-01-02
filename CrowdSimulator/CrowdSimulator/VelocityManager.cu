@@ -4,14 +4,14 @@
 #include <device_launch_parameters.h>
 #include <math.h>
 #include "DataBase.h"
-
+#include "TransferHelper.h"
 
 // Contains the movmement velocity in m/s from 0 Persons / sqm to 5.5 persons / sqm in 0.5 steps.
 __constant__ float m_velocityLookupTable[12] = {1.34f, 1.23f, 1.03f, 0.77f, 0.56f, 0.41f, 0.32f, 0.26f, 0.21f, 0.17f, 0.12f, 0.0f};
 
 void VelocityManager::GenerateVelocityField()
 {
-	m_velocityField = m_helperTransfer.ReserveFloatMemory();
+	m_velocityField = TransferHelper::ReserveFloatMemory();
 }
 
 
@@ -72,8 +72,8 @@ void VelocityManager::UpdateVelocityField(FloatArray density, DataBase* dataBase
 
 void VelocityManager::GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance)
 {
-	m_helperTransfer.VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, textureMemory);
-	m_helperTransfer.VisualizeIsoLines(m_velocityField, isoLineDistance, textureMemory);
+	VisualizationHelper::VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, textureMemory);
+	m_visualizer.VisualizeIsoLines(m_velocityField, isoLineDistance, textureMemory);
 }
 
 

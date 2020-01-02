@@ -5,14 +5,18 @@
 #include <cassert>
 #include <device_launch_parameters.h>
 #include <math.h>
+#include "VisualizationHelper.h"
+#include "TransferHelper.h"
 
 void GradientModule::PreprareModule()
 {
 	assert(m_gradientResultX.m_array == NULL);
 	assert(m_gradientResultY.m_array == NULL);
 
-	m_gradientResultX = m_transferHelper.ReserveFloatMemory();
-	m_gradientResultY = m_transferHelper.ReserveFloatMemory();
+
+						
+	m_gradientResultX = TransferHelper::ReserveFloatMemory();
+	m_gradientResultY = TransferHelper::ReserveFloatMemory();
 
 	assert(m_gradientResultX.m_stride == m_gradientResultY.m_stride);
 }
@@ -253,5 +257,5 @@ void GradientModule::VisualizeField(int component, float maxExepctedValue, uchar
 	assert(m_gradientResultY.m_array);
 
 	FloatArray fieldToVisualize = component ? m_gradientResultY : m_gradientResultX;
-	m_transferHelper.VisualizeScalarFieldWithNegative(fieldToVisualize, maxExepctedValue,  textureMemory);
+	VisualizationHelper::VisualizeScalarFieldWithNegative(fieldToVisualize, maxExepctedValue,  textureMemory);
 }
