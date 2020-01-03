@@ -5,6 +5,7 @@
 #include <math.h>
 #include "DataBase.h"
 #include "TransferHelper.h"
+#include "VisualizationHelper.h"
 
 // Contains the movmement velocity in m/s from 0 Persons / sqm to 5.5 persons / sqm in 0.5 steps.
 __constant__ float m_velocityLookupTable[12] = {1.34f, 1.23f, 1.03f, 0.77f, 0.56f, 0.41f, 0.32f, 0.26f, 0.21f, 0.17f, 0.12f, 0.0f};
@@ -73,7 +74,7 @@ void VelocityManager::UpdateVelocityField(FloatArray density, DataBase* dataBase
 void VelocityManager::GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance)
 {
 	VisualizationHelper::VisualizeScalarField(m_velocityField, gMaximumWalkingVelocity, textureMemory);
-	m_visualizer.VisualizeIsoLines(m_velocityField, isoLineDistance, textureMemory);
+	VisualizationHelper::VisualizeIsoLines(m_velocityField, isoLineDistance, textureMemory);
 }
 
 

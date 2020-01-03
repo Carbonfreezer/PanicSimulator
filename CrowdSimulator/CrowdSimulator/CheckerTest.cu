@@ -36,6 +36,6 @@ void CheckerTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, 
 {
 	m_updateCounter += 1;
 	
-	GenerateStructure CUDA_DECORATOR_SCREEN (deviceMemory, gScreenResolution, m_updateCounter);
+	GenerateStructure << <dim3(gNumOfBlocks * gPixelsPerCell, gNumOfBlocks * gPixelsPerCell), dim3(gBlockSize, gBlockSize) >> > (deviceMemory, gScreenResolution, m_updateCounter);
 	
 }

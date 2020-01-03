@@ -6,9 +6,13 @@
 #include "VelocityTest.h"
 #include "GradientTest.h"
 #include "ContinuityEquationTest.h"
+#include "SimulationCore.h"
 #include <cassert>
+#include <cstring>
 
 static FrameWork gBaseFrameWork;
+static SimulationCore gSimulationCore;
+
 
 static CheckerTest gChecker;
 static FlagTest gFlagTest;
@@ -18,17 +22,19 @@ static VelocityTest gVelocity;
 static GradientTest gGradientTest;
 static ContinuityEquationTest gContinuityTest;
 
-int main(int argc, char **argv)
-{	
-	// The title for the test,
-	const char* title = "Missing title";
-	LogicClass* usedLogic = NULL;
-	BaseFileNames fileNames;
+/**
+ * \brief Function to use if we want to be able to run the test suite for the different components.
+ * \param choice Selector of test to run
+ * \param title The title window we want to generate.
+ * \param usedLogic The pointer with the used logic we return.
+ * \param fileNames the structure with the filenames we want to load.
+ */
+void PrepareTestSuite(char choice, const char*& title, LogicClass*& usedLogic, BaseFileNames& fileNames)
+{
 	
-	if (argc != 2)
-		return 0;
-
-	switch(argv[1][0])
+	
+	
+	switch(choice)
 	{
 	case '0':
 		title = "Checker Test";
@@ -247,7 +253,30 @@ int main(int argc, char **argv)
 		break;
 
 	}
-	
+}
+
+void PrepareCoreSimulation(const char* iniFile,  const char*& title, LogicClass*& usedLogic, BaseFileNames& fileNames)
+{
+	usedLogic = &gSimulationCore;
+	fileNames.LoadFilenames(iniFile);
+	title = iniFile;
+}
+
+int main(int argc, char **argv)
+{	
+	// The title for the test,
+	const char* title = "Missing title";
+	LogicClass* usedLogic = NULL;
+	BaseFileNames fileNames;
+
+	if (argc != 2)
+		return 0;
+
+
+	if (strlen(argv[1]) == 1)
+		PrepareTestSuite(argv[1][0], title, usedLogic, fileNames);
+	else
+		PrepareCoreSimulation(argv[1], title, usedLogic, fileNames);
 
 
 	assert(usedLogic);

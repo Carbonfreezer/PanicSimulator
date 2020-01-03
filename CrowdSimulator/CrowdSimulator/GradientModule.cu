@@ -1,7 +1,6 @@
 #include "GradientModule.h"
 #include "GlobalConstants.h"
 #include "CudaHelper.h"
-#include "DataBase.h"
 #include <cassert>
 #include <device_launch_parameters.h>
 #include <math.h>
@@ -21,7 +20,7 @@ void GradientModule::PreprareModule()
 	assert(m_gradientResultX.m_stride == m_gradientResultY.m_stride);
 }
 
-__global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride, float* gradientX, float* gradientY,
+__global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsigned int* blockedField, size_t blockedStride, float* gradientX, float* gradientY,
                        size_t gradientStride)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
@@ -49,7 +48,7 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	
 	__syncthreads();
 
-	if (wallField[xOrigin + yOrigin * wallStride] != 0)
+	if (blockedField[xOrigin + yOrigin * blockedStride] != 0)
 	{
 		gradientX[xOrigin + yOrigin * gradientStride] = 0.0f;
 		gradientY[xOrigin + yOrigin * gradientStride] = 0.0f;
@@ -58,8 +57,8 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 
 
 	// We start with the x component.
-	bool leftValid = ((xOrigin != 1) && (wallField[(xOrigin - 1) + yOrigin * wallStride]) == 0);
-	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (wallField[(xOrigin + 1) + yOrigin * wallStride]) == 0);
+	bool leftValid = ((xOrigin != 1) && (blockedField[(xOrigin - 1) + yOrigin * blockedStride]) == 0);
+	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (blockedField[(xOrigin + 1) + yOrigin * blockedStride]) == 0);
 	float result = 0.0f;
 
 	
@@ -75,12 +74,15 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 		result = (inputBuffer[xScan][yScan] - inputBuffer[xScan - 1][yScan]) / (gCellSize);
 	}
 
+	if (isnan(result))
+		result = 0.0f;
+
 	gradientX[xOrigin  + yOrigin  * gradientStride] = result;
 
 	
 	// Now the same with the y component.
-	bool topValid = ((yOrigin != 1) && (wallField[xOrigin  + (yOrigin - 1) * wallStride]) == 0);
-	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (wallField[xOrigin + (yOrigin + 1) * wallStride]) == 0);
+	bool topValid = ((yOrigin != 1) && (blockedField[xOrigin  + (yOrigin - 1) * blockedStride]) == 0);
+	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (blockedField[xOrigin + (yOrigin + 1) * blockedStride]) == 0);
 	result = 0.0f;
 
 	if (topValid && bottomValid)
@@ -96,20 +98,24 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 		result = (inputBuffer[xScan][yScan] - inputBuffer[xScan][yScan - 1]) / (gCellSize);
 	}
 
+	if (isnan(result))
+		result = 0.0f;
+
+	
 	gradientY[xOrigin + yOrigin * gradientStride] = result;
 	
 }
 
-void GradientModule::ComputeGradient(FloatArray inputField, DataBase* dataBase)
+void GradientModule::ComputeGradient(FloatArray inputField, UnsignedArray blockedElements)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCuda CUDA_DECORATOR_LOGIC (inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride, 
+	ComputeGradientCuda CUDA_DECORATOR_LOGIC (inputField.m_array, inputField.m_stride, blockedElements.m_array, blockedElements.m_stride, 
 		m_gradientResultX.m_array, m_gradientResultY.m_array, m_gradientResultX.m_stride);
 }
 
 
-__global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride, float* gradientX, 
+__global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputStride, unsigned int* blockedField, size_t blockedStride, float* gradientX, 
 	size_t gradientStride)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
@@ -137,7 +143,7 @@ __global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputSt
 
 	__syncthreads();
 
-	if (wallField[xOrigin + yOrigin * wallStride] != 0)
+	if (blockedField[xOrigin + yOrigin * blockedStride] != 0)
 	{
 		gradientX[xOrigin + yOrigin * gradientStride] = 0.0f;
 		return;
@@ -145,8 +151,8 @@ __global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputSt
 
 
 	// We start with the x component.
-	bool leftValid = ((xOrigin != 1) && (wallField[(xOrigin - 1) + yOrigin * wallStride]) == 0);
-	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (wallField[(xOrigin + 1) + yOrigin * wallStride]) == 0);
+	bool leftValid = ((xOrigin != 1) && (blockedField[(xOrigin - 1) + yOrigin * blockedStride]) == 0);
+	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (blockedField[(xOrigin + 1) + yOrigin * blockedStride]) == 0);
 	float result = 0.0f;
 
 
@@ -173,16 +179,16 @@ __global__ void ComputeGradientCudaXDivergence(float* inputField, size_t inputSt
 
 
 
-void GradientModule::ComputeGradientXForDivergence(FloatArray inputField, DataBase* dataBase)
+void GradientModule::ComputeGradientXForDivergence(FloatArray inputField, UnsignedArray blockedElements)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCudaXDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
+	ComputeGradientCudaXDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, blockedElements.m_array, blockedElements.m_stride,
 		m_gradientResultX.m_array,  m_gradientResultX.m_stride);
 }
 
 
-__global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputStride, unsigned int* wallField, size_t wallStride, float* gradientY,
+__global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputStride, unsigned int* blockedField, size_t blockedStride, float* gradientY,
 	size_t gradientStride)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
@@ -210,7 +216,7 @@ __global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputSt
 
 	__syncthreads();
 
-	if (wallField[xOrigin + yOrigin * wallStride] != 0)
+	if (blockedField[xOrigin + yOrigin * blockedStride] != 0)
 	{
 		gradientY[xOrigin + yOrigin * gradientStride] = 0.0f;
 		return;
@@ -220,8 +226,8 @@ __global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputSt
 
 
 	// Now the same with the y component.
-	bool topValid = ((yOrigin != 1) && (wallField[xOrigin + (yOrigin - 1) * wallStride]) == 0);
-	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (wallField[xOrigin + (yOrigin + 1) * wallStride]) == 0);
+	bool topValid = ((yOrigin != 1) && (blockedField[xOrigin + (yOrigin - 1) * blockedStride]) == 0);
+	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (blockedField[xOrigin + (yOrigin + 1) * blockedStride]) == 0);
 	float result = 0.0f;
 
 	if (topValid && bottomValid)
@@ -242,11 +248,11 @@ __global__ void ComputeGradientCudaYDivergence(float* inputField, size_t inputSt
 }
 
 
-void GradientModule::ComputeGradientYForDivergence(FloatArray inputField, DataBase* dataBase)
+void GradientModule::ComputeGradientYForDivergence(FloatArray inputField, UnsignedArray blockedElements)
 {
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
-	ComputeGradientCudaYDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
+	ComputeGradientCudaYDivergence CUDA_DECORATOR_LOGIC(inputField.m_array, inputField.m_stride, blockedElements.m_array, blockedElements.m_stride,
 		m_gradientResultY.m_array, m_gradientResultX.m_stride);
 }
 

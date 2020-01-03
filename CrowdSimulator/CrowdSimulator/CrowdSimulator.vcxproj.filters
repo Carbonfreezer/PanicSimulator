@@ -52,11 +52,20 @@
     <ClCompile Include="MemoryStructs.cpp">
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </ClCompile>
+    <ClCompile Include="EikonalTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulationCore.cpp">
+      <Filter>SourceFiles</Filter>
+    </ClCompile>
     <ClCompile Include="DataBase.cpp">
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </ClCompile>
-    <ClCompile Include="EikonalTest.cpp">
-      <Filter>SourceFiles\TestClasses</Filter>
+    <ClCompile Include="BaseFIleNames.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSystem.cpp">
+      <Filter>SourceFiles\SupportAndFramework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +133,12 @@
       <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
     <ClInclude Include="VisualizationHelper.h">
+      <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationCore.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="InputSystem.h">
       <Filter>HeaderFiles\SupportAndFramework</Filter>
     </ClInclude>
   </ItemGroup>

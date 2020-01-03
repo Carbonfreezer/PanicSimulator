@@ -34,6 +34,8 @@ void FrameWork::RunCoreLoop()
 		cudaGraphicsMapResources(1, &m_cuda_pixel_buffer_object);
 		cudaGraphicsResourceGetMappedPointer((void **)&deviceMem, &num_bytes, m_cuda_pixel_buffer_object);
 
+		m_inputSystem.Update();
+		m_usedLogic->HandleInput(&m_inputSystem, &m_usedDataBase);
 		m_usedLogic->UpdateSystem(deviceMem, (float)timeDifference, &m_usedDataBase);
 
 		cudaGraphicsUnmapResources(1, &m_cuda_pixel_buffer_object);
@@ -89,6 +91,8 @@ void FrameWork::InitializeGLEWandGLFW(const char* windowTitle)
 
 	assert(screenHeight == gScreenResolution);
 	assert(screenWidth == gScreenResolution);
+
+	m_inputSystem.InitializeSystem(m_window);
 
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;

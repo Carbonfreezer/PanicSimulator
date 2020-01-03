@@ -4,26 +4,65 @@
 #include "TransferHelper.h"
 #include "BaseFileNames.h"
 
-// This is a central accumulation point for all the data we have available.
+/**
+ * \brief  This is a central accumulation point for all the data we have available.
+ * The program is designed that way, that no constance is assumed between updates (the system is stateless),
+ * so manipulations of the data can be performed during updates.
+ */
 class DataBase
 {
 public:
 	DataBase() { m_alreadyLoaded = false; }
-	// Loads all the files for the specific cases. NULL pointers can be inserted to assume default configurations.
+
+	/**
+	 * \brief Loads all the files for the specific cases. NULL pointers can be inserted to assume default configurations.
+	 * \param fileNames Struct with the file names.
+	 */
 	void LoadFiles(BaseFileNames fileNames);
-	// Frees all the resources from the graphics card.
+
+	
+	/**
+	 * \brief Frees all the resources from the graphics card.
+	 */
 	void FreeResources();
 
+	/**
+	 * \brief Gets initial density data. This is the density at the beginning of the simulation.
+	 * \return Density data
+	 */
 	FloatArray GetInitialDensityData() { return m_initialDensityData; }
+
+
+	/**
+	 * \brief Gets the spawn data, this field guarantees for a certain minimum of
+	 * people desnity in an indicated area. This is done on a per update basis-
+	 * \return Spawn data.
+	 */
 	FloatArray GetSpawnData() { return m_spawnData; }
 
+	/**
+	 * \brief Contains the wall information (digital)
+	 * \return Wall information.
+	 */
 	UnsignedArray GetWallData() { return m_wallData; }
+
+
+	/**
+	 * \brief Contains target data where people try to walk to. (digital)
+	 * \return The target data.
+	 */
 	UnsignedArray GetTargetData() { return  m_targetData; }
+
+	
+	/**
+	 * \brief Gets the information where people should despawn (digital)
+	 * \return The information where people should despawn.
+	 */
 	UnsignedArray GetDespawnData() { return m_despawnData; }
 	
 private:
 	bool m_alreadyLoaded;
-
+	
 	TgaReader m_reader;
 	
 	FloatArray m_initialDensityData;
@@ -32,6 +71,7 @@ private:
 	UnsignedArray m_wallData;
 	UnsignedArray m_targetData;
 	UnsignedArray m_despawnData;
+	UnsignedArray m_wallDespawn;
 
 
 	UnsignedArray DefaultLoadUnsigned(const char* fileName);

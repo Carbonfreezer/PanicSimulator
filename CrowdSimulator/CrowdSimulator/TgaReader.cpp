@@ -15,7 +15,7 @@ TgaReader::TgaReader()
 TgaReader::~TgaReader()
 {
 	if (m_pixels != NULL)
-		delete m_pixels;
+		delete [] m_pixels;
 
 	m_pixels = NULL;
 }

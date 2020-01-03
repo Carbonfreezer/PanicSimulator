@@ -7,6 +7,9 @@
 #include "CudaHelper.h"
 
 
+
+FloatArray VisualizationHelper::m_isoLineData;
+
 __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, uchar4* pixelMemory, uchar4 color)
 {
 	int baseX = (threadIdx.x + blockIdx.x * blockDim.x) * gPixelsPerCell;
@@ -27,7 +30,7 @@ __global__  void MarcIfFlagged(unsigned int* deviceMemory, size_t devicePitch, u
 		}
 }
 
-void VisualizationHelper::MarcColor(UnsignedArray data, uchar4* pixelMemory, uchar4 color)
+void VisualizationHelper::MarcColor(UnsignedArray data, uchar4 color, uchar4* pixelMemory)
 {
 	assert(data.m_array);
 	MarcIfFlagged CUDA_DECORATOR_LOGIC(data.m_array, data.m_stride, pixelMemory, color);

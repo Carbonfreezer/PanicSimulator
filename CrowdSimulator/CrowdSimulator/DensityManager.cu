@@ -12,10 +12,11 @@ void DensityManager::InitializeManager(DataBase* dataBase)
 {
 	m_density = TransferHelper::ReserveFloatMemory();
 	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
+	m_continuitySolver.PrepareSolver();
 }
 
 __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsigned* wallInformaton, size_t strideWall, float* spawnArea, size_t strideSpawn,
-                    unsigned int* targetAreaData, size_t strideTarget)
+                    unsigned int* despawnData, size_t despawnStride)
 {
 	int xRead = threadIdx.x + blockIdx.x * blockDim.x + 1;
 	int yRead = threadIdx.y + blockIdx.y * blockDim.y + 1;
@@ -41,10 +42,11 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsi
 		densityBuffer[strideDensity * (gGridSizeExternal - 1)] = 0.0f;
 	}
 
-	if ((wallInformaton[xRead + strideWall * yRead]) || (targetAreaData[xRead + strideTarget * yRead]))
+	if ((wallInformaton[xRead + strideWall * yRead]) || (despawnData[xRead + despawnStride * yRead]))
 	{
 		// Wliminate density on walls and targets.
 		densityBuffer[xRead + strideDensity * yRead] = 0.0f;
+		
 	} else
 	{
 		// Build the maximum, there may already be other people walking through the spawn area.
@@ -70,4 +72,14 @@ void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {
 	VisualizationHelper::VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
+}
+
+void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField, FloatArray velocityField, DataBase* dataBase)
+{
+	m_continuitySolver.IntegrateEquation(timePassed, m_density, velocityField, timeField, dataBase);
+}
+
+void DensityManager::ResetDensity(DataBase* dataBase)
+{
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
 }

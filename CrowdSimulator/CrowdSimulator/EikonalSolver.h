@@ -1,6 +1,5 @@
 #pragma once
 #include <surface_types.h>
-#include "TransferHelper.h"
 #include "MemoryStructs.h"
 
 class DataBase;
@@ -19,11 +18,11 @@ public:
 	// Prepare iterating.
 	void PrepareSolving();
 
-	// Performs n iteration steps.
-	void PerformIterations(FloatArray velocityField, DataBase* dataBase );
+	// Solves the equation.
+	void SolveEquation(FloatArray velocityField, DataBase* dataBase );
 
 	// Asks for the time field.
-	FloatArray GetTimeField() { return m_timeArray[0]; }
+	FloatArray GetTimeField() { return m_timeArray[1]; }
 
 private:
 	// Which double buffer do we use?

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "TransferHelper.h"
 #include "MemoryStructs.h"
+#include "ContinuityEquationSolver.h"
+#include <channel_descriptor.h>
 
 class DataBase;
 
@@ -17,23 +18,52 @@ class DensityManager
 
 public:
 	
-	// Sets up all the data. Uses the initial density to fill the density field.
+	/**
+	 * \brief Sets up all the data. Uses the initial density to fill the density field. 
+	 * \param dataBase all the static data.
+	 */
 	void InitializeManager(DataBase* dataBase);
 
 	
+	/**
+	 * \brief Gets the density field.
+	 * \return Current density field.
+	 */
 	FloatArray GetDensityField() { return m_density; }
 
-	// Enforces the current information on spawn, target and wall information (handed over)
+	/**
+	 * \brief Enforces the current information on spawn, target and wall information (handed over)
+	 * \param dataBase Contains all the boundary conditions.
+	 */
 	void EnforceBoundaryConditions(DataBase* dataBase);
 
-	// Visualizes the current density information.
+	// 
+	/**
+	 * \brief Visualizes the current density information. For test purposes only. 
+	 * \param textureMemory Memory to draw into.
+	 */
 	void GenerateDensityVisualization(uchar4* textureMemory);
 
-	// To be implemented later on.
-	void UpdateDensityField(float timePassed, FloatArray eikonalSolution, DataBase* dataBase){};
+	
+	/**
+	 * \brief Performs the integration of the continuity equation.
+	 * \param timePassed The time integration step size.
+	 * \param timeField The time field that comes from the Eikonal Solver.
+	 * \param velocityField The velocity field (magnitude) 
+	 * \param dataBase The database for the boundary conditions.
+	 */
+	void UpdateDensityField(float timePassed, FloatArray timeField, FloatArray velocityField, DataBase* dataBase);
+
+
+	/**
+	 * \brief Gets called when the density should be put back to the initial condition.
+	 * \param data_base The databdase with all the information.
+	 */
+	void ResetDensity(DataBase* dataBase);
 
 private:
 
 	FloatArray m_density;
+	ContinuityEquationSolver m_continuitySolver;
 	
 };

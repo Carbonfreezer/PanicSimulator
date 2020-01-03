@@ -1,8 +1,6 @@
 #pragma once
-#include <surface_types.h>
-#include "TransferHelper.h"
 #include "MemoryStructs.h"
-#include "VisualizationHelper.h"
+#include <channel_descriptor.h>
 
 class DataBase;
 
@@ -16,22 +14,36 @@ class VelocityManager
 {
 public:
 
-	
-	// Generate velocity field.
+	/**
+	 * \brief Generates the internal representation of the velocity field.
+	 */
 	void GenerateVelocityField();
 
-	// Updates the velocity field with the density field handed over.
+	/**
+	 * \brief  Updates the velocity field with the density field handed over.
+	 * This is not an incremental process.
+	 * \param density The density of the persons we generate the velocity from.
+	 * \param dataBase The database with the boundary conditions.
+	 */
 	void UpdateVelocityField(FloatArray density, DataBase* dataBase);
 
-	// Obtains the velocity information.
+	
+	/**
+	 * \brief Obtains the velocity information. 
+	 * \return The contained velocity field.
+	 */
 	FloatArray GetVelocityField() { return m_velocityField; }
 	
 
-	// Generates a visualization of the velocity field.
+	
+	/**
+	 * \brief Generates a visualization of the velocity field. For debug and test purposes only.
+	 * \param textureMemory The texture memory we paint into.
+	 * \param isoLineDistance The distances we apply between iso lines.
+	 */
 	void GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance);
 	
 private:
 	FloatArray m_velocityField;
-	VisualizationHelper m_visualizer;
 
 };

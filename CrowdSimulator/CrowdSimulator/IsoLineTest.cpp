@@ -6,5 +6,5 @@
 void IsoLineTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	VisualizationHelper::VisualizeScalarField(dataBase->GetInitialDensityData(), gMaximumDensity, deviceMemory);
-	m_visualizer.VisualizeIsoLines(dataBase->GetInitialDensityData(), gMaximumDensity / 15.0f,  deviceMemory);
+	VisualizationHelper::VisualizeIsoLines(dataBase->GetInitialDensityData(), gMaximumDensity / 15.0f,  deviceMemory);
 }

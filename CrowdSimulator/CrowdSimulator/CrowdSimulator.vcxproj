@@ -84,13 +84,16 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseFIleNames.cpp" />
     <ClCompile Include="ContinuityEquationTest.cpp" />
     <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="FlagTest.cpp" />
     <ClCompile Include="GradientTest.cpp" />
     <ClCompile Include="EikonalTest.cpp" />
+    <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
     <ClCompile Include="MemoryStructs.cpp" />
+    <ClCompile Include="SimulationCore.cpp" />
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
     <CudaCompile Include="ContinuityEquationSolver.cu" />
@@ -123,9 +126,11 @@
     <ClInclude Include="ContinuityEquationTest.h" />
     <ClInclude Include="EikonalSolver.h" />
     <ClInclude Include="EikonalTest.h" />
+    <ClInclude Include="InputSystem.h" />
     <ClInclude Include="IsoLineTest.h" />
     <ClInclude Include="LogicClass.h" />
     <ClInclude Include="MemoryStructs.h" />
+    <ClInclude Include="SimulationCore.h" />
     <ClInclude Include="TgaReader.h" />
     <ClInclude Include="TransferHelper.h" />
     <ClInclude Include="VelocityManager.h" />

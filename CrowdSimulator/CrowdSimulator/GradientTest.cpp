@@ -17,6 +17,6 @@ void GradientTest::PrepareTest(int visualizationDecision)
 
 void GradientTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_gradientModule.ComputeGradient(m_densityInformation, dataBase);
+	m_gradientModule.ComputeGradient(m_densityInformation, dataBase->GetWallData());
 	m_gradientModule.VisualizeField(m_visualizationDecision, 3.0f, deviceMemory);
 }

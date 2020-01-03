@@ -1,6 +1,7 @@
 #include "EikonalTest.h"
 #include "DataBase.h"
 #include <vector_functions.hpp>
+#include "VisualizationHelper.h"
 
 
 void EikonalTest::ToolSystem(DataBase* dataBase)
@@ -17,11 +18,11 @@ void EikonalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, 
 	m_velocityManager.UpdateVelocityField(densityField,dataBase);
 
 	FloatArray velocityField = m_velocityManager.GetVelocityField();
-	m_solver.PerformIterations( velocityField,  dataBase);
+	m_solver.SolveEquation( velocityField,  dataBase);
 	
 	
 	FloatArray timeField = m_solver.GetTimeField();
 
 	VisualizationHelper::VisualizeScalarField(timeField, m_maximumTime, deviceMemory);
-	m_visualizer.VisualizeIsoLines(timeField, m_isoLineDistance,  deviceMemory);
+	VisualizationHelper::VisualizeIsoLines(timeField, m_isoLineDistance,  deviceMemory);
 }

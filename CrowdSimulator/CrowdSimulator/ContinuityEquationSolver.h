@@ -9,10 +9,20 @@ class DataBase;
 class ContinuityEquationSolver
 {
 public:
-	// Does an initial prepare of the solver.
+	/**
+	 * \brief Does an initial prepare of the solver. 
+	 */
 	void PrepareSolver();
 
-	// Integrate the continuity equation and modifies the density field.
+	// 
+	/**
+	 * \brief Integrate the continuity equation and modifies the density field. 
+	 * \param timePassed The time step to integrate into the future.
+	 * \param density The density of the persons that gets updated.
+	 * \param velocity The velocity with which the persons walk.
+	 * \param timeToDestination The time field to destination that comes from the eikonal solver.
+	 * \param dataBase The database with the boundary conditions.
+	 */
 	void IntegrateEquation(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, DataBase* dataBase);
 
 private:
@@ -26,5 +36,8 @@ private:
 	// The array with the premultiplied gradient.
 	FloatArray m_premultipliedGradientX;
 	FloatArray m_premultipliedGradientY;
+
+	// The array with the blocked elements (logical or of wall and despawn).
+	UnsignedArray m_blockedElements;
 	
 };

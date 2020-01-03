@@ -116,7 +116,7 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 		float u = fminf(timeBuffer[sourceBuffer][xScan + 1][yScan], timeBuffer[sourceBuffer][xScan - 1][yScan]);
 		float v = fminf(timeBuffer[sourceBuffer][xScan ][yScan + 1], timeBuffer[sourceBuffer][xScan][yScan - 1]);
 
-
+		
 		int conda = (timeEstimate <= u);
 		int condb = (timeEstimate <= v);
 
@@ -161,7 +161,7 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 		return;
 
 	int blockHasConverged = (convergedThreads == gBlockSize * gBlockSize);
-	atomicAdd(&gBlocksHaveConverged, blockHasConverged) + blockHasConverged;
+	atomicAdd(&gBlocksHaveConverged, blockHasConverged);
 
 	int blocksProcessed = atomicAdd(&gBlocksCountedForConvergence, 1) + 1;
 	if (blocksProcessed != gNumOfBlocks * gNumOfBlocks)
@@ -186,7 +186,7 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 
 
 
-void EikonalSolver::PerformIterations( FloatArray velocity, DataBase* dataBase)
+void EikonalSolver::SolveEquation( FloatArray velocity, DataBase* dataBase)
 {
 
 	assert(m_timeArray[0].m_array);
@@ -199,11 +199,8 @@ void EikonalSolver::PerformIterations( FloatArray velocity, DataBase* dataBase)
 	// We have tu run a prestep to get the border filled.
 	for (int i = 0; i < gMaximumIterationsGodunov; ++i)
 	{
-		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[0].m_array, m_timeArray[1 ].m_array, m_timeArray[0].m_stride,
+		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[i % 2].m_array, m_timeArray[1 - i % 2 ].m_array, m_timeArray[0].m_stride,
 			velocity.m_array, velocity.m_stride);
-		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[1].m_array, m_timeArray[0].m_array, m_timeArray[0].m_stride,
-			velocity.m_array, velocity.m_stride);
-		// VerifyConvergence CUDA_DECORATOR_LOGIC(m_timeArray[0].m_array, m_timeArray[1].m_array, m_timeArray[0].m_stride);
 	}
 
 }

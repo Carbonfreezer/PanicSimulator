@@ -1,5 +1,4 @@
 #pragma once
-#include <surface_types.h>
 #include "GlobalConstants.h"
 #include "MemoryStructs.h"
 
@@ -12,32 +11,74 @@ class TransferHelper
 {
 public:
 
-	//
-	// Generating initial data fields.
-	// 
-	
-	// Uploads the pictures as unsigned char array. Takes the red component. Picture must be 285 by 285. Resulting image is 287 by 287 adding the boundary structures.
+	/**
+	 * \brief Uploads the pictures as unsigned char array. Takes the red component. Picture must be 288 by 288. Resulting image is 290 by 290 adding the boundary structures.
+	 * \param reader Tga reader to read data from.
+	 * \param boundaryValue The value that should be assumed at the outer pixel ring (boundary).
+	 * \return Structure that describes the memory on the graphics card.
+	 */
 	static UnsignedArray  UploadPicture(TgaReader* reader, unsigned char boundaryValue);
-	// Transforms all to float values.
+
+	/**
+	 * \brief Uploads the pictures as unsigned float array. Takes the red component. Picture must be 288 by 288. Resulting image is 290 by 290 adding the boundary structures.
+	 * \param reader Tga Reader to read data from
+	 * \param boundaryValue The boundary value assumed on the outer rim
+	 * \param minValueMapped The float value that should get mapped to red 0.
+	 * \param maxValueMapped The float value that should get mapped to red 255.
+	 * \return Structure that describes the float array on the graphics card. 
+	 */
 	static FloatArray UploadPictureAsFloat(TgaReader* reader, float boundaryValue, float minValueMapped, float maxValueMapped);
 
-	// Simply reserves some space for the processing part in floats.
+	/**
+	 * \brief Reserves a float array on the graphics card will with 0.
+	 * \return Memory on graphics card.
+	 */
 	static FloatArray ReserveFloatMemory();
-	// Simply reserves unsigned memory (filled with zero).
+
+	/**
+	 * \brief Reserves n unsigned  array on the graphics card will with 0.
+	 * \return  Memory on graphics card.
+	 */
 	static UnsignedArray ReserveUnsignedMemory();
 	
-	// Reserves float memory filled with a defined constant value.
+	/**
+	 * \brief Reserves float memory filled with a defined constant value. 
+	 * \param value Value to get filled into the memory.
+	 * \return Float Arrayy on graphics card.
+	 */
 	static FloatArray UpfronFilledValue(float value);
-	// Builds a horizontal gradient field decreasing in size.
+
+	/**
+	 * \brief Copies data from to on the GPU.
+	 * \param source Source to copy data from.
+	 * \param destination Destination to copy data to.
+	 */
+	static void CopyDataFromTo(FloatArray source, FloatArray destination);
+
+	/**
+	 * \brief Builds a horizontal gradient field decreasing in size.
+	 * \param startMax The maximum value we have on one side (other is zero) 
+	 * \param direction 0 or 1 differentiating x direction 1 increases in dimension 0 decreases
+	 * \return Float Array with allocated memory on graphics card.
+	 */
 	static FloatArray BuildHorizontalGradient(float startMax, int direction);
-	// Builds a vertical gradient field decreasing in size.
+
+	/**
+	 * \brief Builds a horizontal gradient field decreasing in size.
+	 * \param startMax The maximum value we have on one side (other is zero)
+	 * \param direction direction 0 or 1 differentiating y direction 1 increases in dimension 0 decreases
+	 * \return Array with allocated memory on graphics card.
+	 */
 	static FloatArray BuildVerticalGradient(float startMax, int direction);
-	// Builds a radial gradient.
+
+	/**
+	 * \brief Builds a radial gradient around the center.
+	 * \param startMax The maximum value we get.
+	 * \param direction 0 increasing with distance 1 decreasing
+	 * \return Float value structure of the gradient field.
+	 */
 	static FloatArray BuildRadialGradient(float startMax, int direction);
 
-
-	// Copys float data from to on the GPU.
-	static void CopyDataFromTo(FloatArray source, FloatArray destination);
 	
 private:
 	static int m_intArea[gGridSizeExternal * gGridSizeExternal];
