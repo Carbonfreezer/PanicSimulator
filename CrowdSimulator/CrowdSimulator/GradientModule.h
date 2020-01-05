@@ -1,5 +1,6 @@
 #pragma once
 #include "MemoryStructs.h"
+#include <channel_descriptor.h>
 
 
 class DataBase;
@@ -29,27 +30,6 @@ public:
 	 * \param blockedElements Indicates which elements not to use for the gradient computation.
 	 */
 	void ComputeGradient(FloatArray inputField, UnsignedArray blockedElements);
-
-
-
-	/**
-	 * \brief Only computes the x component of the gradient. Need for divergence computation. Pays special attention to the boundary
-	 * conditions that always the smaller result from right/left sided difference quotients and from central difference quotient
-	 * assuming 0 on boundary values is chosen.
-	 * \param inputField Field to compute x derivative from. 
-	 *  \param blockedElements Indicates which elements not to use for the gradient computation.
-	 */
-	void ComputeGradientXForDivergence(FloatArray inputField, UnsignedArray blockedElements);
-
-	
-	/**
-	 * \brief Only computes the y component of the gradient. Need for divergence computation. Pays special attention to the boundary
-	 * conditions that always the smaller result from bottom/top sided difference quotients and from central difference quotient
-	 * assuming 0 on boundary values is chosen.
-	 * \param inputField Field to compute y derivative from.
-	 * \param blockedElements Indicates which elements not to use for the gradient computation.
-	 */
-	void ComputeGradientYForDivergence(FloatArray inputField, UnsignedArray blockedElements);
 
 
 	

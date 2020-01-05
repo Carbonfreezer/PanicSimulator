@@ -70,7 +70,7 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 	FloatArray timeField = m_eikonalSolver.GetTimeField();
 
 	// Now we integrate the continuity equation.
-	m_density.UpdateDensityField(timePassedInSeconds * m_simulationFactor, timeField, velocityField, dataBase);
+	m_density.UpdateDensityField(timePassedInSeconds * m_simulationFactor, timeField,  dataBase);
 
 	densityField = m_density.GetDensityField();
 

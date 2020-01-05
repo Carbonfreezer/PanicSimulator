@@ -23,21 +23,11 @@ public:
 	 * \param timeToDestination The time field to destination that comes from the eikonal solver.
 	 * \param dataBase The database with the boundary conditions.
 	 */
-	void IntegrateEquation(float  timePassed, FloatArray density, FloatArray velocity, FloatArray timeToDestination, DataBase* dataBase);
+	void IntegrateEquation(float  timePassed, FloatArray density,  FloatArray timeToDestination, DataBase* dataBase);
 
 private:
 	// This contains the gradient of the iconal equation.
 	GradientModule m_gradientIconal;
-	// This is the module for the x derivative of the special field.
-	GradientModule m_specialXDerivative;
-	// The same for the y derivative.
-	GradientModule m_specialYDerivative;
-
-	// The array with the premultiplied gradient.
-	FloatArray m_premultipliedGradientX;
-	FloatArray m_premultipliedGradientY;
-
-	// The array with the blocked elements (logical or of wall and despawn).
-	UnsignedArray m_blockedElements;
-	
+	// The buffer for storing the between results.
+	FloatArray m_resultBuffer;
 };

@@ -251,7 +251,12 @@ void PrepareTestSuite(char choice, const char*& title, LogicClass*& usedLogic, B
 		gContinuityTest.PrepareTest(4);
 		fileNames.m_initialDensityFile = "OuterRing.tga";
 		break;
-
+	case 'Y':
+		title = "Continuity Test 12";
+		usedLogic = &gContinuityTest;
+		gContinuityTest.PrepareTest(0);
+		fileNames.m_initialDensityFile = "Diagonal.tga";
+		break;
 	}
 }
 

@@ -49,10 +49,9 @@ public:
 	 * \brief Performs the integration of the continuity equation.
 	 * \param timePassed The time integration step size.
 	 * \param timeField The time field that comes from the Eikonal Solver.
-	 * \param velocityField The velocity field (magnitude) 
 	 * \param dataBase The database for the boundary conditions.
 	 */
-	void UpdateDensityField(float timePassed, FloatArray timeField, FloatArray velocityField, DataBase* dataBase);
+	void UpdateDensityField(float timePassed, FloatArray timeField,  DataBase* dataBase);
 
 
 	/**

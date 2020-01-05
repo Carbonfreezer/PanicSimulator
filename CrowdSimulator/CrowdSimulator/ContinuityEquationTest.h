@@ -10,6 +10,10 @@
 class ContinuityEquationTest : public LogicClass
 {
 public:
+	/**
+	 * \brief Prepares the test by giving a direction for the vector field
+	 * \param eikonalMode 0: Left Direction 1: Right Direction 2: Top direction 3: bottom direction 4: inner direction 5: outer direction 
+	 */
 	void PrepareTest(int eikonalMode);
 
 	/**
@@ -30,7 +34,6 @@ public:
 private:
 	
 	FloatArray m_pseudoIconalData;
-	FloatArray m_velocityData;
 	FloatArray m_densityData;
 	
 	ContinuityEquationSolver m_solver;

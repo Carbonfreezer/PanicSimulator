@@ -30,14 +30,13 @@ void ContinuityEquationTest::PrepareTest(int eikonalMode)
 		break;
 	}
 	
-	m_velocityData = TransferHelper::UpfronFilledValue(gMaximumWalkingVelocity);
 	m_densityData = TransferHelper::ReserveFloatMemory();
 
 }
 
 void ContinuityEquationTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_solver.IntegrateEquation(timePassedInSeconds, m_densityData, m_velocityData, m_pseudoIconalData, dataBase);
+	m_solver.IntegrateEquation(timePassedInSeconds, m_densityData,  m_pseudoIconalData, dataBase);
 	VisualizationHelper::VisualizeScalarField(m_densityData, gMaximumDensity, deviceMemory);
 }
 

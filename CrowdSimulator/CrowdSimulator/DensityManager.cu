@@ -74,9 +74,9 @@ void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 	VisualizationHelper::VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
 }
 
-void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField, FloatArray velocityField, DataBase* dataBase)
+void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField,  DataBase* dataBase)
 {
-	m_continuitySolver.IntegrateEquation(timePassed, m_density, velocityField, timeField, dataBase);
+	m_continuitySolver.IntegrateEquation(timePassed, m_density,  timeField, dataBase);
 }
 
 void DensityManager::ResetDensity(DataBase* dataBase)

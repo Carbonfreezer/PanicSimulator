@@ -6,122 +6,145 @@
 #include "TransferHelper.h"
 #include "DataBase.h"
 
+
+
+
 void ContinuityEquationSolver::PrepareSolver()
 {
 	m_gradientIconal.PreprareModule();
-	m_specialXDerivative.PreprareModule();
-	m_specialYDerivative.PreprareModule();
-
-	m_premultipliedGradientX = TransferHelper::ReserveFloatMemory();
-	m_premultipliedGradientY = TransferHelper::ReserveFloatMemory();
-
-	m_blockedElements = TransferHelper::ReserveUnsignedMemory();
+	m_resultBuffer = TransferHelper::ReserveFloatMemory();
 }
 
-__global__ void Multiply(float* gradientXSource, float* gradientYSource, float* gradientXDestination, float* gradientYDestination, 
-		size_t gradientStride, float* densityArray, size_t densityStride, 
-	float* velocityArray, size_t velocityStride)
+
+__global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,  
+								float* derivativeX, float* derivativeY,
+							float* result)
 {
+	__shared__ float xDiv[gBlockSize + 2][gBlockSize + 2];
+	__shared__ float yDiv[gBlockSize + 2][gBlockSize + 2];
+
+	
+
+	// Prefill the data.
+
 	// We keep tack of the pixel  we are responsible for.
 	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
 	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
 
-	float density = densityArray[xOrigin + yOrigin * densityStride];
-	float velocity = velocityArray[xOrigin + yOrigin * velocityStride];
-	float factor = density * velocity * velocity;
+	int xScan = threadIdx.x + 1;
+	int yScan = threadIdx.y + 1;
 
-	gradientXDestination[xOrigin + yOrigin * gradientStride] = gradientXSource[xOrigin + yOrigin * gradientStride] * factor;
-	gradientYDestination[xOrigin + yOrigin * gradientStride] = gradientYSource[xOrigin + yOrigin * gradientStride] * factor;
-}
-
-__global__ void IntegrateEuler(float timePassed, float* density, size_t densityStride, float* xComponent, float* yComponent, size_t componentStride)
-{
-	// We keep tack of the pixel  we are responsible for.
-	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
-	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
-
-
-	float sum = xComponent[xOrigin + yOrigin * componentStride] + yComponent[xOrigin + yOrigin * componentStride];
+	float factor;
 	
-	float accumulator = density[xOrigin + yOrigin * densityStride];
-	accumulator += timePassed * sum;
-	accumulator = fmaxf(accumulator, 0.0f);
-	accumulator = fminf(accumulator, gMaximumDensity);
+	float xDivPure;
+	float yDivPure;
+	float localDensity;
 
-	density[xOrigin + yOrigin * densityStride] = accumulator;
+	float xGrad, yGrad;
+
+	xGrad = derivativeX[xOrigin + yOrigin * strides];
+	yGrad = derivativeY[xOrigin + yOrigin * strides];
+
+
+	// If both are zero we get an error here.
+	factor = 1.0f / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
+	
+	localDensity = density[xOrigin + yOrigin * strides];
+	xDivPure = xGrad * factor;
+	xDiv[xScan][yScan] = xDivPure * localDensity;
+	yDivPure = yGrad * factor;
+	yDiv[xScan][yScan] = yDivPure * localDensity;
+
+	// Copy over the border lines, we do not need the corner elements.
+	// We also do not need the density on the border lines.
+	if (threadIdx.x == 0)
+	{
+		xGrad = derivativeX[(xOrigin - 1) + yOrigin * strides];
+		yGrad = derivativeY[(xOrigin - 1) + yOrigin * strides];
+		
+		factor  = density[(xOrigin - 1) + yOrigin * strides] /(xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
+		xDiv[xScan - 1][yScan] = xGrad * factor;
+		yDiv[xScan - 1][yScan] = yGrad * factor;
+	}
+		
+	if (threadIdx.x == 31)
+	{
+		xGrad = derivativeX[(xOrigin + 1) + yOrigin * strides];
+		yGrad = derivativeY[(xOrigin + 1) + yOrigin * strides];
+		
+		factor = density[(xOrigin + 1) + yOrigin * strides] / (xGrad * xGrad + yGrad * yGrad  + FLT_EPSILON);
+		xDiv[xScan + 1][yScan] = xGrad * factor;
+		yDiv[xScan + 1][yScan] = yGrad * factor;
+	}
+		
+	if (threadIdx.y == 0)
+	{
+		xGrad = derivativeX[(xOrigin)+(yOrigin - 1) * strides];
+		yGrad = derivativeY[(xOrigin)+(yOrigin - 1) * strides];
+
+		factor = density[(xOrigin)+(yOrigin - 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
+		xDiv[xScan][yScan - 1] = xGrad * factor;
+		yDiv[xScan][yScan - 1] = yGrad * factor;
+	}
+		
+	if (threadIdx.y == 31)
+	{
+		xGrad = derivativeX[(xOrigin)+(yOrigin + 1) * strides];
+		yGrad = derivativeY[(xOrigin)+(yOrigin + 1) * strides];
+
+		factor = density[(xOrigin)+(yOrigin + 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
+		xDiv[xScan][yScan + 1] = xGrad * factor;
+		yDiv[xScan][yScan + 1] = yGrad * factor;
+	}
+		
+
+	__syncthreads();
+
+	
+	
+	float xDerivative;
+	if (xDivPure >= 0.0f)
+		xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan][yScan]) / (gCellSize);
+	else
+		xDerivative = (xDiv[xScan][yScan] - xDiv[xScan - 1][yScan]) / (gCellSize);
+
+	
+	float yDerivative;
+	if (yDivPure >= 0.0f)
+		yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan]) / (gCellSize);
+	else
+		yDerivative = (yDiv[xScan][yScan] - yDiv[xScan ][yScan - 1]) / (gCellSize);
+
+	float finalValue  = localDensity + timePassed * (xDerivative + yDerivative);
+	finalValue = fmaxf(0.0f, finalValue);
+	finalValue = fminf(gMaximumWalkingVelocity, finalValue);
+
+	result[xOrigin + yOrigin * strides] = finalValue;
+
+	
 	
 }
 
-__global__ void LogicalOr(unsigned int* dataA, size_t strideA, unsigned int* dataB, size_t strideB, unsigned int* destination, size_t destinationStride)
-{
-	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
-	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
 
-	destination[xOrigin + yOrigin * destinationStride] = dataA[xOrigin + yOrigin * strideA] || dataB[xOrigin + yOrigin * strideB];
-}
-
-void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray density, FloatArray velocity,
-	FloatArray timeToDestination, DataBase* dataBase)
+void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray density,  FloatArray timeToDestination, DataBase* dataBase)
 {
 
+	UnsignedArray wallData = dataBase->GetWallData();
 	// First we need the gradient of the iconal equation.
-	m_gradientIconal.ComputeGradient(timeToDestination, dataBase->GetWallData());
+	m_gradientIconal.ComputeGradient(timeToDestination, wallData);
 
-	// We need a logical or for the wall and the despawn data for the divergence computation later on.
-	// We do this in every update, because we do not want to rely on the fact that the data in the base remains constant.
-	LogicalOr CUDA_DECORATOR_LOGIC (dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride, dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride,
-		m_blockedElements.m_array, m_blockedElements.m_stride);
-	
 	FloatArray gradX = m_gradientIconal.GetXComponent();
 	FloatArray gradY = m_gradientIconal.GetYComponent();
-
 	assert(gradX.m_stride == gradY.m_stride);
-	assert(gradX.m_stride == m_premultipliedGradientX.m_stride);
-	assert(m_premultipliedGradientY.m_stride == m_premultipliedGradientX.m_stride);
-	// Hard limit iterations.
-	if (timePassed > 10.0f * gMaximumStepsizeContinuitySolver)
-		timePassed = 10.0f * gMaximumStepsizeContinuitySolver;
-	
-	bool endOfIterationReached = false;
-	do
-	{
-		float timeStep;
+	assert(gradX.m_stride == density.m_stride);
+	assert(gradX.m_stride == m_resultBuffer.m_stride);
+	assert(gradX.m_stride == wallData.m_stride);
 
-		if (timePassed <= gMaximumStepsizeContinuitySolver)
-		{
-			timeStep = timePassed;
-			endOfIterationReached = true;
-		}
-		else
-		{
-			timeStep = gMaximumStepsizeContinuitySolver;
-			timePassed -= timeStep;
-		}
+	IntegrateCuda CUDA_DECORATOR_LOGIC (timePassed, gradX.m_stride, density.m_array,  gradX.m_array, gradY.m_array, m_resultBuffer.m_array);
 
-		// Pre multiply the gradient with the density and velocity fields.
-		Multiply CUDA_DECORATOR_LOGIC(gradX.m_array, gradY.m_array, m_premultipliedGradientX.m_array, m_premultipliedGradientY.m_array,
-			gradX.m_stride, density.m_array, density.m_stride, velocity.m_array, velocity.m_stride);
+	// TODO: Make double buffer later on.
 
-
-		// Now we can compute the gradients of both fields needed for the final integration step.
-		m_specialXDerivative.ComputeGradientXForDivergence(m_premultipliedGradientX, m_blockedElements);
-		m_specialYDerivative.ComputeGradientYForDivergence(m_premultipliedGradientY, m_blockedElements);
-
-		// We need the x component of the x derivative and the y component of the y derivative.
-		FloatArray xComponent = m_specialXDerivative.GetXComponent();
-		FloatArray yComponent = m_specialYDerivative.GetYComponent();
-
-		// Now we can integrate the equation of motion.
-		assert(xComponent.m_stride == yComponent.m_stride);
-
+	TransferHelper::CopyDataFromTo(m_resultBuffer, density);
 		
-		IntegrateEuler CUDA_DECORATOR_LOGIC(timeStep, density.m_array, density.m_stride, xComponent.m_array, yComponent.m_array, xComponent.m_stride);
-
-		
-	} while (!endOfIterationReached);
-
-	
-
-	
 }
 
