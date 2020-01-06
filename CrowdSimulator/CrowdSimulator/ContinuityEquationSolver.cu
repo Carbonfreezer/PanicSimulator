@@ -154,9 +154,6 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 
 	__syncthreads();
 
-	if (localDensity > 1.8f)
-		localDensity = localDensity;
-
 	
 	float xDerivative;
 	if (xDivPure >= 0.0f)
