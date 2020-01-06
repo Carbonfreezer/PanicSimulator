@@ -31,6 +31,15 @@ public:
 	static void VisualizeScalarField(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
 
 	/**
+	 * \brief Visualizes a scalar field as a blue red gradient blue being minimal value and red being a maximum value. Values above are clamped.
+	 * \param deviceData The scalar field to be visualized.
+	 * \param minimumValue The minimal value where we start with blue.
+	 * \param maximumValue The assumed maximum value for pure red.
+	 * \param pixelMemory The pixel memory we write data to.
+	 */
+	static void VisualizeScalarField(FloatArray deviceData, float minimumValue, float maximumValue, uchar4* pixelMemory);
+
+	/**
 	 * \brief Visualizes a scalar field as a blue red gradient blue being -maximum value and red being a maximum value. Values above / below are clamped.
 	 * \param deviceData The scalar field to be visualized.
 	 * \param maximumValue The assumed maximum value for pure red or -maximum for blue.

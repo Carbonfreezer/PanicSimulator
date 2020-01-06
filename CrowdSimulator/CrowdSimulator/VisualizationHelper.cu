@@ -130,8 +130,40 @@ void VisualizationHelper::VisualizeScalarField(FloatArray deviceData, float maxi
 	VisualizeField CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
-__global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue,
+
+__global__ void  VisualizeFieldFromTo(float* deviceMemory, size_t devicePitch, float minimumValue, float maximumValue, uchar4* pixelMemory)
+{
+	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
+	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
+
+
+	float candidate = deviceMemory[(baseX + 1) + devicePitch * (baseY + 1)];
+	candidate = fmaxf(minimumValue, candidate);
+	candidate = fminf(maximumValue, candidate);
+	candidate -= minimumValue;
+	
+
+	unsigned char redColor = (unsigned char)(255.0f * candidate / (maximumValue - minimumValue ));
+	uchar4 finalColor = make_uchar4(redColor, 0, 255 - redColor, 255);
+
+	baseX *= gPixelsPerCell;
+	baseY *= gPixelsPerCell;
+
+	for (int i = 0; i < gPixelsPerCell; ++i)
+		for (int j = 0; j < gPixelsPerCell; ++j)
+			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
+}
+
+
+void VisualizationHelper::VisualizeScalarField(FloatArray deviceData, float minimumValue, float maximumValue,
 	uchar4* pixelMemory)
+{
+	assert(deviceData.m_array);
+	VisualizeFieldFromTo CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, minimumValue, maximumValue, pixelMemory);
+}
+
+__global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue,
+                                            uchar4* pixelMemory)
 {
 	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
 	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
@@ -154,7 +186,7 @@ __global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePi
 }
 
 void VisualizationHelper::VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue,
-	uchar4* pixelMemory)
+                                                           uchar4* pixelMemory)
 {
 	assert(deviceData.m_array);
 	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);

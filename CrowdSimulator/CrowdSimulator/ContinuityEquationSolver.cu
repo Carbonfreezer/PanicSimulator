@@ -51,6 +51,7 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 	localDensity = density[xOrigin + yOrigin * strides];
 
 
+
 	// Deal with the inf * zero situation.
 	if (factor == 0.0f)
 	{
@@ -153,6 +154,9 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 
 	__syncthreads();
 
+	if (localDensity > 1.8f)
+		localDensity = localDensity;
+
 	
 	float xDerivative;
 	if (xDivPure >= 0.0f)
@@ -193,12 +197,26 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray de
 	assert(gradX.m_stride == m_resultBuffer.m_stride);
 	assert(gradX.m_stride == wallData.m_stride);
 
-	
-	IntegrateCuda CUDA_DECORATOR_LOGIC (timePassed, gradX.m_stride, density.m_array,  gradX.m_array, gradY.m_array, m_resultBuffer.m_array);
+	bool isTerminated = false;
+	float localTimeStep;
+	while(!isTerminated)
+	{
+		if (timePassed > 2 * gMaximumStepsizeContinuitySolver)
+		{
+			localTimeStep = gMaximumStepsizeContinuitySolver;
+			timePassed -= 2.0f * gMaximumStepsizeContinuitySolver;
+		}
+		else
+		{
+			isTerminated = true;
+			localTimeStep = timePassed / 2.0f;
+		}
+		IntegrateCuda CUDA_DECORATOR_LOGIC(localTimeStep, gradX.m_stride, density.m_array, gradX.m_array, gradY.m_array, m_resultBuffer.m_array);
+		IntegrateCuda CUDA_DECORATOR_LOGIC(localTimeStep, gradX.m_stride, m_resultBuffer.m_array, gradX.m_array, gradY.m_array, density.m_array);
 
-	// TODO: Make double buffer later on.
+		
+	}
 
-	TransferHelper::CopyDataFromTo(m_resultBuffer, density);
 		
 }
 
