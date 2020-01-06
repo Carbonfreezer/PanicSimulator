@@ -7,6 +7,7 @@
 #include "GradientTest.h"
 #include "ContinuityEquationTest.h"
 #include "SimulationCore.h"
+#include "LowPassFilterTest.h"
 #include <cassert>
 #include <cstring>
 
@@ -21,6 +22,7 @@ static EikonalTest gIconal;
 static VelocityTest gVelocity;
 static GradientTest gGradientTest;
 static ContinuityEquationTest gContinuityTest;
+static LowPassFilterTest gLowPassFilterTest;
 
 /**
  * \brief Function to use if we want to be able to run the test suite for the different components.
@@ -257,6 +259,28 @@ void PrepareTestSuite(char choice, const char*& title, LogicClass*& usedLogic, B
 		gContinuityTest.PrepareTest(0);
 		fileNames.m_initialDensityFile = "Diagonal.tga";
 		break;
+
+	case 'a':
+		title = "Lowpass Filter Test 1";
+		usedLogic = &gLowPassFilterTest;
+		gLowPassFilterTest.SetIterations(1);
+		fileNames.m_initialDensityFile = "Cross.tga";
+		break;
+	case 'b':
+		title = "Lowpass Filter Test 2";
+		usedLogic = &gLowPassFilterTest;
+		gLowPassFilterTest.SetIterations(2);
+		fileNames.m_initialDensityFile = "Cross.tga";
+		break;
+	case 'c':
+		title = "Lowpass Filter Test 3";
+		usedLogic = &gLowPassFilterTest;
+		gLowPassFilterTest.SetIterations(1);
+		fileNames.m_initialDensityFile = "Cross.tga";
+		fileNames.m_wallFile = "Cross.tga";
+		break;
+
+		
 	}
 }
 

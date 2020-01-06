@@ -25,6 +25,9 @@
     <CudaCompile Include="VisualizationHelper.cu">
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </CudaCompile>
+    <CudaCompile Include="LowPassFilter.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -66,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="InputSystem.cpp">
       <Filter>SourceFiles\SupportAndFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="LowPassFilterTest.cpp">
+      <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +146,12 @@
     </ClInclude>
     <ClInclude Include="InputSystem.h">
       <Filter>HeaderFiles\SupportAndFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="LowPassFilter.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="LowPassFilterTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

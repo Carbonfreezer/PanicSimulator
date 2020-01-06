@@ -92,6 +92,7 @@
     <ClCompile Include="EikonalTest.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
+    <ClCompile Include="LowPassFilterTest.cpp" />
     <ClCompile Include="MemoryStructs.cpp" />
     <ClCompile Include="SimulationCore.cpp" />
     <ClCompile Include="TgaReader.cpp" />
@@ -100,6 +101,7 @@
     <CudaCompile Include="DensityManager.cu" />
     <CudaCompile Include="GradientModule.cu" />
     <CudaCompile Include="EikonalSolver.cu" />
+    <CudaCompile Include="LowPassFilter.cu" />
     <CudaCompile Include="TransferHelper.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
@@ -129,6 +131,8 @@
     <ClInclude Include="InputSystem.h" />
     <ClInclude Include="IsoLineTest.h" />
     <ClInclude Include="LogicClass.h" />
+    <ClInclude Include="LowPassFilter.h" />
+    <ClInclude Include="LowPassFilterTest.h" />
     <ClInclude Include="MemoryStructs.h" />
     <ClInclude Include="SimulationCore.h" />
     <ClInclude Include="TgaReader.h" />
