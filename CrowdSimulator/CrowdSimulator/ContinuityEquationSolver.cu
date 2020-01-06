@@ -48,11 +48,22 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 
 	// If both are zero we get an error here.
 	factor = 1.0f / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-	
 	localDensity = density[xOrigin + yOrigin * strides];
-	xDivPure = xGrad * factor;
+
+
+	// Deal with the inf * zero situation.
+	if (factor == 0.0f)
+	{
+		xDivPure = 0.0f;
+		yDivPure = 0.0f;
+	}
+	else
+	{
+		xDivPure = xGrad * factor;
+		yDivPure = yGrad * factor;
+	}
+	
 	xDiv[xScan][yScan] = xDivPure * localDensity;
-	yDivPure = yGrad * factor;
 	yDiv[xScan][yScan] = yDivPure * localDensity;
 
 	// Copy over the border lines, we do not need the corner elements.
@@ -63,8 +74,18 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 		yGrad = derivativeY[(xOrigin - 1) + yOrigin * strides];
 		
 		factor  = density[(xOrigin - 1) + yOrigin * strides] /(xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-		xDiv[xScan - 1][yScan] = xGrad * factor;
-		yDiv[xScan - 1][yScan] = yGrad * factor;
+
+		if (factor == 0.0f)
+		{
+			xDiv[xScan - 1][yScan] = 0.0f;
+			yDiv[xScan - 1][yScan] = 0.0f;
+		}
+		else
+		{
+			xDiv[xScan - 1][yScan] = xGrad * factor;
+			yDiv[xScan - 1][yScan] = yGrad * factor;
+		}
+		
 	}
 		
 	if (threadIdx.x == 31)
@@ -73,8 +94,19 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 		yGrad = derivativeY[(xOrigin + 1) + yOrigin * strides];
 		
 		factor = density[(xOrigin + 1) + yOrigin * strides] / (xGrad * xGrad + yGrad * yGrad  + FLT_EPSILON);
-		xDiv[xScan + 1][yScan] = xGrad * factor;
-		yDiv[xScan + 1][yScan] = yGrad * factor;
+
+		if (factor == 0.0f)
+		{
+			xDiv[xScan + 1][yScan] = 0.0f;
+			yDiv[xScan + 1][yScan] = 0.0f;
+
+		}
+		else
+		{
+			xDiv[xScan + 1][yScan] = xGrad * factor;
+			yDiv[xScan + 1][yScan] = yGrad * factor;
+
+		}
 	}
 		
 	if (threadIdx.y == 0)
@@ -83,8 +115,19 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 		yGrad = derivativeY[(xOrigin)+(yOrigin - 1) * strides];
 
 		factor = density[(xOrigin)+(yOrigin - 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-		xDiv[xScan][yScan - 1] = xGrad * factor;
-		yDiv[xScan][yScan - 1] = yGrad * factor;
+
+		if (factor == 0.0f)
+		{
+			xDiv[xScan][yScan - 1] = 0.0f;
+			yDiv[xScan][yScan - 1] = 0.0f;
+
+		}
+		else
+		{
+			xDiv[xScan][yScan - 1] = xGrad * factor;
+			yDiv[xScan][yScan - 1] = yGrad * factor;
+
+		}
 	}
 		
 	if (threadIdx.y == 31)
@@ -93,14 +136,23 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 		yGrad = derivativeY[(xOrigin)+(yOrigin + 1) * strides];
 
 		factor = density[(xOrigin)+(yOrigin + 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-		xDiv[xScan][yScan + 1] = xGrad * factor;
-		yDiv[xScan][yScan + 1] = yGrad * factor;
+
+		if (factor == 0.0f)
+		{
+			xDiv[xScan][yScan + 1] = 0.0f;
+			yDiv[xScan][yScan + 1] = 0.0f;
+		}
+		else
+		{
+			xDiv[xScan][yScan + 1] = xGrad * factor;
+			yDiv[xScan][yScan + 1] = yGrad * factor;
+		}
+	
 	}
 		
 
 	__syncthreads();
 
-	
 	
 	float xDerivative;
 	if (xDivPure >= 0.0f)
@@ -115,12 +167,13 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 	else
 		yDerivative = (yDiv[xScan][yScan] - yDiv[xScan ][yScan - 1]) / (gCellSize);
 
+
 	float finalValue  = localDensity + timePassed * (xDerivative + yDerivative);
 	finalValue = fmaxf(0.0f, finalValue);
-	finalValue = fminf(gMaximumWalkingVelocity, finalValue);
+	finalValue = fminf(gMaximumDensity, finalValue);
 
 	result[xOrigin + yOrigin * strides] = finalValue;
-
+	
 	
 	
 }
@@ -140,6 +193,7 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray de
 	assert(gradX.m_stride == m_resultBuffer.m_stride);
 	assert(gradX.m_stride == wallData.m_stride);
 
+	
 	IntegrateCuda CUDA_DECORATOR_LOGIC (timePassed, gradX.m_stride, density.m_array,  gradX.m_array, gradY.m_array, m_resultBuffer.m_array);
 
 	// TODO: Make double buffer later on.
