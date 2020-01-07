@@ -60,8 +60,9 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 	// Deal with the corner cases.
 	if ((threadIdx.x == 0) && (threadIdx.y == 0))
 	{
-		valueBuffer[0][0] = input[0];
-		blockedBuffer[0][0] = blocked[0];
+		
+		valueBuffer[0][0] = input[(xOrigin - 1) + (yOrigin - 1) * stride];
+		blockedBuffer[0][0] = blocked[(xOrigin - 1) + (yOrigin - 1) * blockedStride];
 
 		valueBuffer[gBlockSize + 1][0] = input[(xOrigin + gBlockSize) + ( yOrigin - 1) * stride];
 		blockedBuffer[gBlockSize + 1][0] = blocked[(xOrigin + gBlockSize) + (yOrigin - 1) * blockedStride];
@@ -71,6 +72,8 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 
 		valueBuffer[gBlockSize + 1][gBlockSize + 1] = input[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * stride];
 		blockedBuffer[gBlockSize + 1][gBlockSize + 1] = blocked[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * blockedStride];
+		
+
 
 	}
 
@@ -89,7 +92,10 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 	for (int j = -1; j < 2; ++j)
 		for (int i = -1; i < 2; ++i)
 		{
-			float localWeight = (float)(blockedBuffer[xScan + i][yScan + j] == 0) * convolutionKernel[i + 1][j + 1];
+			if ((blockedBuffer[xScan + i][yScan + j]) || (xOrigin + i == 0) || (yOrigin + j == 0) || (xOrigin + i == gGridSizeExternal - 1) || (yOrigin + j == gGridSizeExternal - 1))
+				continue;
+			
+			float localWeight = convolutionKernel[i + 1][j + 1];
 			accumulatedWeight += localWeight;
 			accumulatedResult += localWeight * valueBuffer[xScan + i][yScan + j];
 		}

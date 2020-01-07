@@ -69,3 +69,15 @@
  * \brief The maximum  iterations we intend to cover for the eikonal equation. 
  */
 #define gMaximumIterationsGodunov 200
+
+
+/**
+ * \brief The amount of low pass filter iterations we want to do on the velocity.
+ */
+#define gLowPassFilterVelocity 4
+
+
+/**
+ * \brief The amount of low pass filter operations we want to do on the time.
+ */
+#define gLowPassFilterTime 1

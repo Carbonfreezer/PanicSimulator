@@ -3,6 +3,7 @@
 #include "DensityManager.h"
 #include "VelocityManager.h"
 #include "EikonalSolver.h"
+#include "LowPassFilter.h"
 
 /**
  * \brief This is the core class that runs the complete simulation.
@@ -52,5 +53,10 @@ private:
 	DensityManager m_density;
 	VelocityManager m_velocity;
 	EikonalSolver m_eikonalSolver;
+
+	LowPassFilter m_velocityFilter[2];
+	LowPassFilter m_timeFilter[2];
+
+	FloatArray PerformLowPassIterations(FloatArray input, LowPassFilter filterPair[2], UnsignedArray wallData,  int iterations);
 
 };

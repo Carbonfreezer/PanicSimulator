@@ -171,8 +171,7 @@ __global__ void IntegrateCuda(float timePassed,  size_t strides, float* density,
 
 	float finalValue  = localDensity + timePassed * (xDerivative + yDerivative);
 	finalValue = fmaxf(0.0f, finalValue);
-	finalValue = fminf(gMaximumDensity, finalValue);
-
+	
 	result[xOrigin + yOrigin * strides] = finalValue;
 	
 	

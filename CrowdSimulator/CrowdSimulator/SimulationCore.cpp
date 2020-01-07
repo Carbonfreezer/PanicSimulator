@@ -10,6 +10,10 @@ void SimulationCore::ToolSystem(DataBase* dataBase)
 	m_velocity.GenerateVelocityField();
 	m_density.InitializeManager(dataBase);
 	m_eikonalSolver.PrepareSolving();
+	m_velocityFilter[0].PrepareModule();
+	m_velocityFilter[1].PrepareModule();
+	m_timeFilter[0].PrepareModule();
+	m_timeFilter[1].PrepareModule();
 	m_simulationFactor = 1.0f;
 	m_showsAnnotation = false;
 	m_showEikonalSolution = false;
@@ -59,15 +63,16 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 
 	// Now we feed the density into the velocity system.
 	m_velocity.UpdateVelocityField(densityField, dataBase);
-	FloatArray velocityField = m_velocity.GetVelocityField();
-	
+	FloatArray velocityField = PerformLowPassIterations(m_velocity.GetVelocityField(), m_velocityFilter, dataBase->GetWallData(), gLowPassFilterVelocity);
+		
 	
 	// TODO: Later on comes the crowd pressure here.
 
 
 	// Feed the stuff into the Eukanal solver.
 	m_eikonalSolver.SolveEquation(velocityField, dataBase);
-	FloatArray timeField = m_eikonalSolver.GetTimeField();
+	FloatArray timeField = PerformLowPassIterations(m_eikonalSolver.GetTimeField(), m_timeFilter, dataBase->GetWallData(), gLowPassFilterTime);
+	
 
 	// Now we integrate the continuity equation.
 	m_density.UpdateDensityField(timePassedInSeconds * m_simulationFactor, timeField,  dataBase);
@@ -95,8 +100,20 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 		VisualizationHelper::MarcColor(dataBase->GetTargetData(), make_uchar4(0, 255, 0, 255), deviceMemory);
 
 	}
-
-	
 	
 }
+
+ FloatArray SimulationCore::PerformLowPassIterations(FloatArray input, LowPassFilter filterPair[2], UnsignedArray wallData, int iterations)
+{
+	 filterPair[0].Filter(input, wallData);
+	 int validFilter = 0;
+	 for (int i = 0; i < iterations - 1; ++i)
+	 {
+		 filterPair[ 1 - validFilter].Filter(filterPair[validFilter].GetResult(), wallData);
+		 validFilter = 1 - validFilter;
+	 }
+
+	 return filterPair[validFilter].GetResult();
+}
+
 
