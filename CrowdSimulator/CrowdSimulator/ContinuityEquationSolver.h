@@ -28,6 +28,7 @@ public:
 private:
 	// This contains the gradient of the iconal equation.
 	GradientModule m_gradientIconal;
-	// The buffer for storing the between results.
-	FloatArray m_resultBuffer;
-};
+	// The buffer with the computed derivative Data..
+	FloatArray m_derivativeBuffer;
+
+	};

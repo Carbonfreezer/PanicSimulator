@@ -1,17 +1,8 @@
-
 target: 	SourceLine.tga
 despawn: 	SourceLine.tga
-# density:	CenterBlob.tga 
-# spawn:		CenterBlob.tga 
-# spawn:		SpawnAreaSimple2.tga
-# spawn:		SpawnAreaSimple.tga
+wall: 		WallConvoluted.tga
 spawn:		TopPixelLine.tga
-# density:		TopPixelLine.tga
 
-# spawn:     UpperRightCornerSpawn.tga		
- wall:		WallDoubleSlit.tga
-#  wall:		WallConvoluted.tga
-# wall:		WallSlit.tga	
 
 Description:
 
