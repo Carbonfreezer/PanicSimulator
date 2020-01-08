@@ -42,9 +42,9 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsi
 		densityBuffer[strideDensity * (gGridSizeExternal - 1)] = 0.0f;
 	}
 
-	if ((wallInformaton[xRead + strideWall * yRead]) || (despawnData[xRead + despawnStride * yRead]))
+	if  (despawnData[xRead + despawnStride * yRead])
 	{
-		// Wliminate density on walls and targets.
+		// Eliminate density on targets.
 		densityBuffer[xRead + strideDensity * yRead] = 0.0f;
 		
 	} else

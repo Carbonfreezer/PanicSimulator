@@ -69,9 +69,13 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	} else if (rightValid)
 	{
 		result =  (inputBuffer[xScan + 1][yScan] - inputBuffer[xScan][yScan])  / ( gCellSize);
+		// Left is invalid in that case, we do not want to get a component pointing to the right.
+		result = fminf(0.0f, result);
 	} else if (leftValid)
 	{
 		result = (inputBuffer[xScan][yScan] - inputBuffer[xScan - 1][yScan]) / (gCellSize);
+		// Right is invalid in that case.
+		result = fmaxf(0.0f, result);
 	}
 
 	if (isnan(result))
@@ -92,10 +96,12 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	else if (bottomValid)
 	{
 		result = (inputBuffer[xScan][yScan + 1] - inputBuffer[xScan][yScan]) / (gCellSize);
+		result = fminf(0.0f, result);
 	}
 	else if (topValid)
 	{
 		result = (inputBuffer[xScan][yScan] - inputBuffer[xScan][yScan - 1]) / (gCellSize);
+		result = fmaxf(0.0f, result);
 	}
 
 	if (isnan(result))
