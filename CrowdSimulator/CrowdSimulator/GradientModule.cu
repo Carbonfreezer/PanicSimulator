@@ -17,11 +17,14 @@ void GradientModule::PreprareModule()
 	m_gradientResultX = TransferHelper::ReserveFloatMemory();
 	m_gradientResultY = TransferHelper::ReserveFloatMemory();
 
+	m_extremPoint = TransferHelper::ReserveUnsignedMemory();
+
 	assert(m_gradientResultX.m_stride == m_gradientResultY.m_stride);
+	assert(m_extremPoint .m_stride == m_gradientResultX.m_stride);
 }
 
 __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsigned int* blockedField, size_t blockedStride, float* gradientX, float* gradientY,
-                       size_t gradientStride)
+                       unsigned int* extremPointInfo, size_t gradientStride)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
 
@@ -55,6 +58,7 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 		return;
 	}
 
+	int localExtremum = 0;
 
 	// We start with the x component.
 	bool leftValid = ((xOrigin != 1) && (blockedField[(xOrigin - 1) + yOrigin * blockedStride]) == 0);
@@ -65,7 +69,15 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	
 	if (rightValid && leftValid)
 	{
-		result = (inputBuffer[xScan + 1][yScan] - inputBuffer[xScan - 1][yScan]) / (2.0f * gCellSize);
+		float currentElement = inputBuffer[xScan][yScan];
+		float rightElement = inputBuffer[xScan + 1][yScan];
+		float leftElement = inputBuffer[xScan - 1][yScan];
+		result = ( rightElement - leftElement ) / (2.0f * gCellSize);
+
+		if (((currentElement > rightElement) && (currentElement > leftElement)) ||
+			((currentElement < rightElement) && (currentElement < leftElement)))
+			localExtremum = 1;
+		
 	} else if (rightValid)
 	{
 		result =  (inputBuffer[xScan + 1][yScan] - inputBuffer[xScan][yScan])  / ( gCellSize);
@@ -89,9 +101,18 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (blockedField[xOrigin + (yOrigin + 1) * blockedStride]) == 0);
 	result = 0.0f;
 
+	
+	
 	if (topValid && bottomValid)
 	{
-		result = (inputBuffer[xScan][yScan + 1] - inputBuffer[xScan][yScan - 1]) / (2.0f * gCellSize);
+		float currentElement = inputBuffer[xScan][yScan];
+		float topElement = inputBuffer[xScan][yScan + 1];
+		float bottomElement = inputBuffer[xScan][yScan - 1];
+		result = (topElement - bottomElement) / (2.0f * gCellSize);
+
+		if (((currentElement > topElement) && (currentElement > bottomElement)) ||
+			((currentElement < topElement) && (currentElement < bottomElement)))
+			localExtremum += 2;
 	}
 	else if (bottomValid)
 	{
@@ -109,6 +130,8 @@ __global__ void ComputeGradientCuda(float* inputField, size_t inputStride, unsig
 
 	
 	gradientY[xOrigin + yOrigin * gradientStride] = result;
+
+	extremPointInfo[xOrigin + yOrigin * gradientStride] = localExtremum;
 	
 }
 
@@ -117,7 +140,7 @@ void GradientModule::ComputeGradient(FloatArray inputField, UnsignedArray blocke
 	assert(m_gradientResultX.m_array);
 	assert(m_gradientResultY.m_array);
 	ComputeGradientCuda CUDA_DECORATOR_LOGIC (inputField.m_array, inputField.m_stride, blockedElements.m_array, blockedElements.m_stride, 
-		m_gradientResultX.m_array, m_gradientResultY.m_array, m_gradientResultX.m_stride);
+		m_gradientResultX.m_array, m_gradientResultY.m_array, m_extremPoint.m_array,  m_gradientResultX.m_stride);
 }
 
 

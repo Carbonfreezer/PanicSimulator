@@ -4,6 +4,11 @@ wall: 		CornerWall.tga
 spawn:		CornerSpawn.tga
 
 
+Situation: Corridor Segment length: 30 m
+Width: 5m
+Spawn Density: 1 Person /sqm 
+
+
 Description:
 
 The file contains besides text like this one here lines that associate a keyword with a filename. Keywords and filenames are

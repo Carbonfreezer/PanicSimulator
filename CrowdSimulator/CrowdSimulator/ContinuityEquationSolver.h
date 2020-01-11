@@ -26,8 +26,8 @@ public:
 	void IntegrateEquation(float  timePassed, FloatArray density,  FloatArray timeToDestination, DataBase* dataBase);
 
 private:
-	// This contains the gradient of the iconal equation.
-	GradientModule m_gradientIconal;
+	// This contains the gradient of the eikonal equation.
+	GradientModule m_gradienEikonal;
 	// The buffer with the computed derivative Data..
 	FloatArray m_derivativeBuffer;
 

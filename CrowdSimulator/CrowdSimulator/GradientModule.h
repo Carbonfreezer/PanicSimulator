@@ -45,7 +45,15 @@ public:
 	 * \return y component of gradient
 	 */
 	FloatArray GetYComponent() { return m_gradientResultY; }
-	
+
+
+
+	/**
+	 * \brief Gives information on saddle point, meaning that the indicated pixel represents a local maximum
+	 * or minimum. The x component is encoded in the first bit, the y component in the second bit.
+	 * \return 
+	 */
+	UnsignedArray GerExtremPointInformation() { return m_extremPoint; }
 
 	/**
 	 * \brief Visualizes the gradient of the field. For debug purposes only.
@@ -58,5 +66,7 @@ public:
 private:
 	FloatArray m_gradientResultX;
 	FloatArray m_gradientResultY;
+
+	UnsignedArray m_extremPoint;
 
 };

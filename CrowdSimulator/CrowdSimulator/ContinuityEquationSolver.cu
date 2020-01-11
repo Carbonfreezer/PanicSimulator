@@ -11,13 +11,14 @@
 
 void ContinuityEquationSolver::PrepareSolver()
 {
-	m_gradientIconal.PreprareModule();
+	m_gradienEikonal.PreprareModule();
 	m_derivativeBuffer = TransferHelper::ReserveFloatMemory();
 }
 
 
-__global__ void GetTimeDerivative( size_t strides, float* density,  
-								float* derivativeX, float* derivativeY,
+__global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* density,  
+								float* derivativeX, float* derivativeY, unsigned int* extremPoint,
+								unsigned int* wallInformation,
 							float* result)
 {
 	__shared__ float xDiv[gBlockSize + 2][gBlockSize + 2];
@@ -44,6 +45,7 @@ __global__ void GetTimeDerivative( size_t strides, float* density,
 
 	xGrad = derivativeX[xOrigin + yOrigin * strides];
 	yGrad = derivativeY[xOrigin + yOrigin * strides];
+
 
 
 	// If both are zero we get an error here.
@@ -154,119 +156,74 @@ __global__ void GetTimeDerivative( size_t strides, float* density,
 
 	__syncthreads();
 
-	
-	float xDerivative;
-	if (xDivPure >= 0.0f)
-		xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan][yScan]) / (gCellSize);
-	else
-		xDerivative = (xDiv[xScan][yScan] - xDiv[xScan - 1][yScan]) / (gCellSize);
 
+	// No divergence on wall.
+	if (wallInformation[xOrigin + yOrigin * strides])
+	{
+		result[xOrigin + yOrigin * strides] = 0.0f;
+		return;
+	}
+
+	unsigned int extremPointInfo = extremPoint[xOrigin + yOrigin * strides];
+
+	float xDerivative;
+
+	// In this case we have a confluence or defluencing point and take the central difference quotient.
+	if (extremPointInfo % 2 == 1)
+	{
+		xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan - 1][yScan]) / ( 2.0f * gCellSize);
+	}
+	else
+	{
+		if (xDivPure >= 0.0f)
+			xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan][yScan]) / (gCellSize);
+		else
+			xDerivative = (xDiv[xScan][yScan] - xDiv[xScan - 1][yScan]) / (gCellSize);
+
+	}
 	
 	float yDerivative;
-	if (yDivPure >= 0.0f)
-		yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan]) / (gCellSize);
+
+
+	if (extremPointInfo / 2 == 1)
+	{
+		yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan - 1]) / (2.0f *  gCellSize);
+	}
 	else
-		yDerivative = (yDiv[xScan][yScan] - yDiv[xScan ][yScan - 1]) / (gCellSize);
+	{
+		if (yDivPure >= 0.0f)
+			yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan]) / (gCellSize);
+		else
+			yDerivative = (yDiv[xScan][yScan] - yDiv[xScan][yScan - 1]) / (gCellSize);
+
+	}
 
 
-	result[xOrigin + yOrigin * strides] = xDerivative + yDerivative;
+	float buffer = density[xOrigin + yOrigin * strides] + deltaTime * (xDerivative + yDerivative);
+	buffer = fmaxf(0.0f, buffer);
+	buffer = fminf(buffer, gMaximumDensity);
+	
+	 result[xOrigin + yOrigin * strides] = buffer ;
 	
 }
 
 
-__global__ void PerformCorrectedIntegrationStep(float* originalData,  float* derivativeData, size_t stride, float timePassed)
-{
-	__shared__ float positiveSumPhaseA[gBlockSize][gBlockSize];
-	__shared__ float negativeSumPhaseA[gBlockSize][gBlockSize];
-
-	__shared__ float positiveSumPhaseB[4][4];
-	__shared__ float negativeSumPhaseB[4][4];
-
-	__shared__ float correctionFactor;
-
-	// First we have to build the sum over all negative and positive elements over the derivative data.
-	float localPosSum = 0.0f;
-	float localNegSum = 0.0f;
-	for(int j = threadIdx.y; j < gGridSizeInternal; j += gBlockSize)
-		for(int i = threadIdx.x; i < gGridSizeInternal; i+= gBlockSize)
-		{
-			float candidate = derivativeData[(i + 1) + (j + 1) * stride];
-			if (candidate > 0.0f)
-				localPosSum += candidate;
-			else
-				localNegSum -= candidate;
-		}
-	positiveSumPhaseA[threadIdx.x][threadIdx.y] = localPosSum;
-	negativeSumPhaseA[threadIdx.x][threadIdx.y] = localNegSum;
-
-	__syncthreads();
-	if ((threadIdx.x < 4) && (threadIdx.y < 4))
-	{
-		localPosSum = 0.0f;
-		localNegSum = 0.0f;
-		for (int j = threadIdx.y; j < gBlockSize; j += 4)
-			for (int i = threadIdx.x; i < gBlockSize; i += 4)
-			{
-				localPosSum += positiveSumPhaseA[i][j];
-				localNegSum += negativeSumPhaseA[i][j];
-			}
-		positiveSumPhaseB[threadIdx.x][threadIdx.y] = localPosSum;
-		negativeSumPhaseB[threadIdx.x][threadIdx.y] = localNegSum;
-
-	}
-	__syncthreads();
-	if ((threadIdx.x == 0) && (threadIdx.y == 0))
-	{
-		localPosSum = 0.0f;
-		localNegSum = 0.0f;
-		for (int j = 0; j < 4; ++j)
-			for (int i = 0; i < 4; ++i)
-			{
-				localPosSum += positiveSumPhaseB[i][j];
-				localNegSum += negativeSumPhaseB[i][j];
-			}
-
-		correctionFactor = (localNegSum - localPosSum) / (localPosSum + localNegSum);
-		if (isnan(correctionFactor))
-			correctionFactor = 0.0f;
-		
-	}
-
-	__syncthreads();
-
-
-	
-	// Now the read integration part.
-	for (int j = threadIdx.y; j < gGridSizeInternal; j += gBlockSize)
-		for (int i = threadIdx.x; i < gGridSizeInternal; i += gBlockSize)
-		{
-			float candidate = derivativeData[(i + 1) + (j + 1) * stride];
-			float baseValue = originalData[(i + 1) + (j + 1) * stride];
-			
-			if (candidate > 0.0f)
-				baseValue += timePassed * (1.0f + correctionFactor) * candidate;
-			else
-				baseValue += timePassed * (1.0f - correctionFactor) * candidate;
-			
-			baseValue = fmaxf(0.0f, baseValue);
-			originalData[(i + 1) + (j + 1) * stride] = baseValue;
-
-		}	
-}
 
 void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray density,  FloatArray timeToDestination, DataBase* dataBase)
 {
 
 	UnsignedArray wallData = dataBase->GetWallData();
 	// First we need the gradient of the iconal equation.
-	m_gradientIconal.ComputeGradient(timeToDestination, wallData);
+	m_gradienEikonal.ComputeGradient(timeToDestination, wallData);
 
-	FloatArray gradX = m_gradientIconal.GetXComponent();
-	FloatArray gradY = m_gradientIconal.GetYComponent();
+	FloatArray gradX = m_gradienEikonal.GetXComponent();
+	FloatArray gradY = m_gradienEikonal.GetYComponent();
+	UnsignedArray extremPoint = m_gradienEikonal.GerExtremPointInformation();
 	assert(gradX.m_stride == gradY.m_stride);
 	assert(gradX.m_stride == density.m_stride);
 	assert(gradX.m_stride == m_derivativeBuffer.m_stride);
 	assert(gradX.m_stride == wallData.m_stride);
+	assert(gradX.m_stride == extremPoint.m_stride);
 
 	bool isTerminated = false;
 	float localTimeStep;
@@ -283,12 +240,8 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray de
 			localTimeStep = timePassed;
 		}
 
-		GetTimeDerivative CUDA_DECORATOR_LOGIC (gradX.m_stride, density.m_array, gradX.m_array, gradY.m_array, m_derivativeBuffer.m_array);
-		PerformCorrectedIntegrationStep <<<1,dim3(gBlockSize, gBlockSize)>>>(density.m_array, m_derivativeBuffer.m_array, m_derivativeBuffer.m_stride, localTimeStep);
-		
-		// IntegrateCuda CUDA_DECORATOR_LOGIC(localTimeStep, gradX.m_stride, density.m_array, gradX.m_array, gradY.m_array, m_resultBuffer.m_array);
-		// IntegrateCuda CUDA_DECORATOR_LOGIC(localTimeStep, gradX.m_stride, m_resultBuffer.m_array, gradX.m_array, gradY.m_array, density.m_array);
-
+		IntegrateEquationCuda CUDA_DECORATOR_LOGIC (localTimeStep, density.m_stride, density.m_array, gradX.m_array, gradY.m_array,extremPoint.m_array,wallData.m_array,  m_derivativeBuffer.m_array);
+		TransferHelper::CopyDataFromTo(m_derivativeBuffer, density);
 		
 	}
 

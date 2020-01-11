@@ -1,17 +1,16 @@
+ target: 	EvacuationTarget.tga
+ despawn: 	EvacuationTarget.tga
+ wall: 	EvacuationWall.tga
+#  wall: 		EvacuationWall2.tga
 
-target: 	SourceLine.tga
-despawn: 	SourceLine.tga
-# density:	CenterBlob.tga 
-# spawn:		CenterBlob.tga 
-# spawn:		SpawnAreaSimple2.tga
-# spawn:		SpawnAreaSimple.tga
-spawn:		TopPixelLine.tga
-# density:		TopPixelLine.tga
+ density:	EvacuationSpawn.tga
+#  density:	EvacuationSpawn2.tga
 
-# spawn:     UpperRightCornerSpawn.tga		
-# wall:		WallDoubleSlit.tga
-  wall:		WallConvoluted.tga
-# wall:		WallSlit.tga	
+
+
+
+Spawn Density: 2 Person /sqm 
+
 
 Description:
 

@@ -15,7 +15,7 @@ void DensityManager::InitializeManager(DataBase* dataBase)
 	m_continuitySolver.PrepareSolver();
 }
 
-__global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsigned* wallInformaton, size_t strideWall, float* spawnArea, size_t strideSpawn,
+__global__ void ApplyConditions(float* densityBuffer, size_t strideDensity,  float* spawnArea, size_t strideSpawn,
                     unsigned int* despawnData, size_t despawnStride)
 {
 	int xRead = threadIdx.x + blockIdx.x * blockDim.x + 1;
@@ -62,7 +62,6 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity, unsi
 void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 {
 	ApplyConditions  CUDA_DECORATOR_LOGIC (m_density.m_array, m_density.m_stride,
-		dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride,
 		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
 		dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride);
 }
