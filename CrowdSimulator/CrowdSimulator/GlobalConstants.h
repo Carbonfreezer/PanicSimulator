@@ -54,6 +54,12 @@
 
 
 /**
+ * \brief The maximal crowd pressure we assume for visualization purposes.
+ */
+#define gMaximumCrowdPressure (gMaximumDensity * gMaximumWalkingVelocity * gMaximumWalkingVelocity / 7.0f)
+
+
+/**
  * \brief The maximum step size we tolerate for the continuity euqatrion solver. 
  */
 #define gMaximumStepsizeContinuitySolver 0.010f
@@ -74,7 +80,7 @@
 /**
  * \brief The amount of low pass filter iterations we want to do on the velocity.
  */
-#define gLowPassFilterVelocity 4
+#define gLowPassFilterVelocity 2
 
 
 /**

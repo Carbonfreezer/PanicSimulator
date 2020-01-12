@@ -1,15 +1,14 @@
- target: 	EvacuationTarget.tga
- despawn: 	EvacuationTarget.tga
- wall: 	EvacuationWall.tga
-#  wall: 		EvacuationWall2.tga
+ target: 	EvacuationTarget3.tga
+ despawn: 	EvacuationTarget3.tga
+ wall: 		EvacuationWall3.tga
 
- density:	EvacuationSpawn.tga
-#  density:	EvacuationSpawn2.tga
+  density:	EvacuationSpawn4.tga
 
-
+# spawn:	EvacuationSpawn4.tga
 
 
-Spawn Density: 1 Person /sqm 
+
+Spawn Density: 2 Person /sqm 
 
 
 Description:

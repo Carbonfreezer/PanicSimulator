@@ -9,7 +9,7 @@
 
 
 
-Spawn Density: 2 Person /sqm 
+Spawn Density: 1 Person /sqm 
 
 
 Description:

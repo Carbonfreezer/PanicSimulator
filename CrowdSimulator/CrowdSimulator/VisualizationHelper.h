@@ -31,6 +31,15 @@ public:
 	static void VisualizeScalarField(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
 
 	/**
+	 * \brief Visualizes a scalar field as a grey image 
+	 * \param deviceData The scalar field to visualize
+	 * \param maximumValue The maximum value where we reach the whitest grey value.
+	 * \param pixelMemory The texture memory to write the data into.
+	 */
+	static void VisualizeScalarFieldAsGrey(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
+
+
+	/**
 	 * \brief Visualizes a scalar field as a blue red gradient blue being minimal value and red being a maximum value. Values above are clamped.
 	 * \param deviceData The scalar field to be visualized.
 	 * \param minimumValue The minimal value where we start with blue.
@@ -46,6 +55,16 @@ public:
 	 * \param pixelMemory The pixel memory we write data to.
 	 */
 	static void VisualizeScalarFieldWithNegative(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
+
+
+	/**
+	 * \brief Overlays an existing visualization with a red-yellow gradient visualization that reaches a certain
+	 * minimal threshold over the existing one.
+	 * \param deviceData The device data we generate the visualization from.
+	 * \param maximumValue The maximum value we aim for pure red.
+	 * \param pixelMemory The pixel memory we write data to.
+	 */
+	static void VisualizeHotRegions(FloatArray deviceData, float maximumValue, uchar4* pixelMemory);
 
 	/**
 	 * \brief Visualizes some iso-lines on the indicated float memory field.

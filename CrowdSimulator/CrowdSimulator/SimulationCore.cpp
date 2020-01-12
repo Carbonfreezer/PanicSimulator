@@ -17,6 +17,7 @@ void SimulationCore::ToolSystem(DataBase* dataBase)
 	m_simulationFactor = 1.0f;
 	m_showsAnnotation = false;
 	m_showEikonalSolution = false;
+	m_crowdPressure.ToolSystem();
 
 }
 
@@ -65,9 +66,9 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 	m_velocity.UpdateVelocityField(densityField, dataBase);
 	FloatArray velocityField = PerformLowPassIterations(m_velocity.GetVelocityField(), m_velocityFilter, dataBase->GetWallData(), gLowPassFilterVelocity);
 		
+	m_crowdPressure.ComputeCrowdPressure(densityField, velocityField, dataBase);
 	
-	// TODO: Later on comes the crowd pressure here.
-
+	
 
 	// Feed the stuff into the Eukanal solver.
 	m_eikonalSolver.SolveEquation(velocityField, dataBase);
@@ -86,6 +87,11 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 		break;
 	case 1:
 		VisualizationHelper::VisualizeScalarField(velocityField, gMaximumWalkingVelocity, deviceMemory);
+		break;
+
+	case 2:
+		VisualizationHelper::VisualizeScalarFieldAsGrey (densityField, gMaximumDensity , deviceMemory);
+		VisualizationHelper::VisualizeHotRegions(m_crowdPressure.GetCrowdPressure(), gMaximumCrowdPressure, deviceMemory);
 		break;
 	}
 

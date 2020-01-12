@@ -4,6 +4,7 @@
 #include "VelocityManager.h"
 #include "EikonalSolver.h"
 #include "LowPassFilter.h"
+#include "CrowdPressure.h"
 
 /**
  * \brief This is the core class that runs the complete simulation.
@@ -56,6 +57,8 @@ private:
 
 	LowPassFilter m_velocityFilter[2];
 	LowPassFilter m_timeFilter[2];
+
+	CrowdPressure m_crowdPressure;
 
 	FloatArray PerformLowPassIterations(FloatArray input, LowPassFilter filterPair[2], UnsignedArray wallData,  int iterations);
 

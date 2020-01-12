@@ -60,7 +60,6 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 	// Deal with the corner cases.
 	if ((threadIdx.x == 0) && (threadIdx.y == 0))
 	{
-		
 		valueBuffer[0][0] = input[(xOrigin - 1) + (yOrigin - 1) * stride];
 		blockedBuffer[0][0] = blocked[(xOrigin - 1) + (yOrigin - 1) * blockedStride];
 
@@ -72,9 +71,6 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 
 		valueBuffer[gBlockSize + 1][gBlockSize + 1] = input[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * stride];
 		blockedBuffer[gBlockSize + 1][gBlockSize + 1] = blocked[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * blockedStride];
-		
-
-
 	}
 
 	__syncthreads();

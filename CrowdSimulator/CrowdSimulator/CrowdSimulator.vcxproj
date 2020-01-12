@@ -98,6 +98,7 @@
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
     <CudaCompile Include="ContinuityEquationSolver.cu" />
+    <CudaCompile Include="CrowdPressure.cu" />
     <CudaCompile Include="DensityManager.cu" />
     <CudaCompile Include="GradientModule.cu" />
     <CudaCompile Include="EikonalSolver.cu" />
@@ -117,6 +118,7 @@
     <ClInclude Include="BaseFileNames.h" />
     <ClInclude Include="CheckerTest.h" />
     <ClInclude Include="ContinuityEquationSolver.h" />
+    <ClInclude Include="CrowdPressure.h" />
     <ClInclude Include="CudaHelper.h" />
     <ClInclude Include="DataBase.h" />
     <ClInclude Include="DensityManager.h" />

@@ -21,12 +21,8 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 								unsigned int* wallInformation,
 							float* result)
 {
-	__shared__ float xDiv[gBlockSize + 2][gBlockSize + 2];
-	__shared__ float yDiv[gBlockSize + 2][gBlockSize + 2];
-
-	
-
-	// Prefill the data.
+	__shared__ float xMassTransport[gBlockSize + 2][gBlockSize + 2];
+	__shared__ float yMassTransport[gBlockSize + 2][gBlockSize + 2];
 
 	// We keep tack of the pixel  we are responsible for.
 	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
@@ -35,39 +31,33 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 	int xScan = threadIdx.x + 1;
 	int yScan = threadIdx.y + 1;
 
-	float factor;
-	
-	float xDivPure;
-	float yDivPure;
+	float factor;	
+	float xVelocity;
+	float yVelocity;
 	float localDensity;
 
 	float xGrad, yGrad;
-
 	xGrad = derivativeX[xOrigin + yOrigin * strides];
 	yGrad = derivativeY[xOrigin + yOrigin * strides];
-
-
 
 	// If both are zero we get an error here.
 	factor = 1.0f / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
 	localDensity = density[xOrigin + yOrigin * strides];
 
-
-
 	// Deal with the inf * zero situation.
 	if (factor == 0.0f)
 	{
-		xDivPure = 0.0f;
-		yDivPure = 0.0f;
+		xVelocity = 0.0f;
+		yVelocity = 0.0f;
 	}
 	else
 	{
-		xDivPure = xGrad * factor;
-		yDivPure = yGrad * factor;
+		xVelocity = xGrad * factor;
+		yVelocity = yGrad * factor;
 	}
 	
-	xDiv[xScan][yScan] = xDivPure * localDensity;
-	yDiv[xScan][yScan] = yDivPure * localDensity;
+	xMassTransport[xScan][yScan] = xVelocity * localDensity;
+	yMassTransport[xScan][yScan] = yVelocity * localDensity;
 
 	// Copy over the border lines, we do not need the corner elements.
 	// We also do not need the density on the border lines.
@@ -77,18 +67,16 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 		yGrad = derivativeY[(xOrigin - 1) + yOrigin * strides];
 		
 		factor  = density[(xOrigin - 1) + yOrigin * strides] /(xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-
 		if (factor == 0.0f)
 		{
-			xDiv[xScan - 1][yScan] = 0.0f;
-			yDiv[xScan - 1][yScan] = 0.0f;
+			xMassTransport[xScan - 1][yScan] = 0.0f;
+			yMassTransport[xScan - 1][yScan] = 0.0f;
 		}
 		else
 		{
-			xDiv[xScan - 1][yScan] = xGrad * factor;
-			yDiv[xScan - 1][yScan] = yGrad * factor;
+			xMassTransport[xScan - 1][yScan] = xGrad * factor;
+			yMassTransport[xScan - 1][yScan] = yGrad * factor;
 		}
-		
 	}
 		
 	if (threadIdx.x == 31)
@@ -97,17 +85,16 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 		yGrad = derivativeY[(xOrigin + 1) + yOrigin * strides];
 		
 		factor = density[(xOrigin + 1) + yOrigin * strides] / (xGrad * xGrad + yGrad * yGrad  + FLT_EPSILON);
-
 		if (factor == 0.0f)
 		{
-			xDiv[xScan + 1][yScan] = 0.0f;
-			yDiv[xScan + 1][yScan] = 0.0f;
+			xMassTransport[xScan + 1][yScan] = 0.0f;
+			yMassTransport[xScan + 1][yScan] = 0.0f;
 
 		}
 		else
 		{
-			xDiv[xScan + 1][yScan] = xGrad * factor;
-			yDiv[xScan + 1][yScan] = yGrad * factor;
+			xMassTransport[xScan + 1][yScan] = xGrad * factor;
+			yMassTransport[xScan + 1][yScan] = yGrad * factor;
 
 		}
 	}
@@ -118,17 +105,16 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 		yGrad = derivativeY[(xOrigin)+(yOrigin - 1) * strides];
 
 		factor = density[(xOrigin)+(yOrigin - 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-
 		if (factor == 0.0f)
 		{
-			xDiv[xScan][yScan - 1] = 0.0f;
-			yDiv[xScan][yScan - 1] = 0.0f;
+			xMassTransport[xScan][yScan - 1] = 0.0f;
+			yMassTransport[xScan][yScan - 1] = 0.0f;
 
 		}
 		else
 		{
-			xDiv[xScan][yScan - 1] = xGrad * factor;
-			yDiv[xScan][yScan - 1] = yGrad * factor;
+			xMassTransport[xScan][yScan - 1] = xGrad * factor;
+			yMassTransport[xScan][yScan - 1] = yGrad * factor;
 
 		}
 	}
@@ -139,23 +125,19 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 		yGrad = derivativeY[(xOrigin)+(yOrigin + 1) * strides];
 
 		factor = density[(xOrigin)+(yOrigin + 1) * strides] / (xGrad * xGrad + yGrad * yGrad + FLT_EPSILON);
-
 		if (factor == 0.0f)
 		{
-			xDiv[xScan][yScan + 1] = 0.0f;
-			yDiv[xScan][yScan + 1] = 0.0f;
+			xMassTransport[xScan][yScan + 1] = 0.0f;
+			yMassTransport[xScan][yScan + 1] = 0.0f;
 		}
 		else
 		{
-			xDiv[xScan][yScan + 1] = xGrad * factor;
-			yDiv[xScan][yScan + 1] = yGrad * factor;
+			xMassTransport[xScan][yScan + 1] = xGrad * factor;
+			yMassTransport[xScan][yScan + 1] = yGrad * factor;
 		}
 	
 	}
-		
-
 	__syncthreads();
-
 
 	// No divergence on wall.
 	if (wallInformation[xOrigin + yOrigin * strides])
@@ -167,44 +149,37 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 	unsigned int extremPointInfo = extremPoint[xOrigin + yOrigin * strides];
 
 	float xDerivative;
-
 	// In this case we have a confluence or defluencing point and take the central difference quotient.
 	if (extremPointInfo % 2 == 1)
 	{
-		xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan - 1][yScan]) / ( 2.0f * gCellSize);
+		xDerivative = (xMassTransport[xScan + 1][yScan] - xMassTransport[xScan - 1][yScan]) / ( 2.0f * gCellSize);
 	}
 	else
 	{
-		if (xDivPure >= 0.0f)
-			xDerivative = (xDiv[xScan + 1][yScan] - xDiv[xScan][yScan]) / (gCellSize);
+		if (xVelocity >= 0.0f)
+			xDerivative = (xMassTransport[xScan + 1][yScan] - xMassTransport[xScan][yScan]) / (gCellSize);
 		else
-			xDerivative = (xDiv[xScan][yScan] - xDiv[xScan - 1][yScan]) / (gCellSize);
-
+			xDerivative = (xMassTransport[xScan][yScan] - xMassTransport[xScan - 1][yScan]) / (gCellSize);
 	}
 	
 	float yDerivative;
-
-
 	if (extremPointInfo / 2 == 1)
 	{
-		yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan - 1]) / (2.0f *  gCellSize);
+		yDerivative = (yMassTransport[xScan][yScan + 1] - yMassTransport[xScan][yScan - 1]) / (2.0f *  gCellSize);
 	}
 	else
 	{
-		if (yDivPure >= 0.0f)
-			yDerivative = (yDiv[xScan][yScan + 1] - yDiv[xScan][yScan]) / (gCellSize);
+		if (yVelocity >= 0.0f)
+			yDerivative = (yMassTransport[xScan][yScan + 1] - yMassTransport[xScan][yScan]) / (gCellSize);
 		else
-			yDerivative = (yDiv[xScan][yScan] - yDiv[xScan][yScan - 1]) / (gCellSize);
-
+			yDerivative = (yMassTransport[xScan][yScan] - yMassTransport[xScan][yScan - 1]) / (gCellSize);
 	}
 
 
 	float buffer = density[xOrigin + yOrigin * strides] + deltaTime * (xDerivative + yDerivative);
 	buffer = fmaxf(0.0f, buffer);
 	buffer = fminf(buffer, gMaximumDensity);
-	
-	 result[xOrigin + yOrigin * strides] = buffer ;
-	
+	result[xOrigin + yOrigin * strides] = buffer ;
 }
 
 

@@ -28,6 +28,9 @@
     <CudaCompile Include="LowPassFilter.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
+    <CudaCompile Include="CrowdPressure.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -152,6 +155,9 @@
     </ClInclude>
     <ClInclude Include="LowPassFilterTest.h">
       <Filter>HeaderFiles\TestClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CrowdPressure.h">
+      <Filter>HeaderFiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

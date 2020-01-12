@@ -130,8 +130,36 @@ void VisualizationHelper::VisualizeScalarField(FloatArray deviceData, float maxi
 	VisualizeField CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
+__global__ void  VisualizeFieldGrey(float* deviceMemory, size_t devicePitch, float maximumValue, uchar4* pixelMemory)
+{
+	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
+	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
 
-__global__ void  VisualizeFieldFromTo(float* deviceMemory, size_t devicePitch, float minimumValue, float maximumValue, uchar4* pixelMemory)
+
+	float candidate = deviceMemory[(baseX + 1) + devicePitch * (baseY + 1)];
+
+
+	unsigned char greyValue = (unsigned char)(75.0f * fminf(maximumValue, candidate) / maximumValue);
+	uchar4 finalColor = make_uchar4(greyValue, greyValue, greyValue, 255);
+
+	baseX *= gPixelsPerCell;
+	baseY *= gPixelsPerCell;
+
+	for (int i = 0; i < gPixelsPerCell; ++i)
+		for (int j = 0; j < gPixelsPerCell; ++j)
+			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
+}
+
+
+void VisualizationHelper::VisualizeScalarFieldAsGrey(FloatArray deviceData, float maximumValue, uchar4* pixelMemory)
+{
+	assert(deviceData.m_array);
+	VisualizeFieldGrey CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
+}
+
+
+__global__ void  VisualizeFieldFromTo(float* deviceMemory, size_t devicePitch, float minimumValue, float maximumValue,
+                                      uchar4* pixelMemory)
 {
 	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
 	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
@@ -156,10 +184,11 @@ __global__ void  VisualizeFieldFromTo(float* deviceMemory, size_t devicePitch, f
 
 
 void VisualizationHelper::VisualizeScalarField(FloatArray deviceData, float minimumValue, float maximumValue,
-	uchar4* pixelMemory)
+                                               uchar4* pixelMemory)
 {
 	assert(deviceData.m_array);
-	VisualizeFieldFromTo CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, minimumValue, maximumValue, pixelMemory);
+	VisualizeFieldFromTo CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, minimumValue, maximumValue,
+	                                          pixelMemory);
 }
 
 __global__ void  VisualizeFieldWithNegative(float* deviceMemory, size_t devicePitch, float maximumValue,
@@ -190,5 +219,42 @@ void VisualizationHelper::VisualizeScalarFieldWithNegative(FloatArray deviceData
 {
 	assert(deviceData.m_array);
 	VisualizeFieldWithNegative CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
+}
+
+__global__ void  VisualizeHotRegionCuda(float* deviceMemory, size_t devicePitch, float maximumValue,
+	uchar4* pixelMemory)
+{
+	const float minimalThreshold = 0.25f;
+
+	int baseX = (threadIdx.x + blockIdx.x * blockDim.x);
+	int baseY = (threadIdx.y + blockIdx.y * blockDim.y);
+
+
+	float candidate = deviceMemory[(baseX + 1) + devicePitch * (baseY + 1)];
+
+	if (candidate < minimalThreshold * maximumValue)
+		return;
+
+	candidate = fminf(candidate, maximumValue);
+	candidate = (candidate / maximumValue - minimalThreshold) / (1.0f - minimalThreshold);
+	
+	unsigned char greenColor = (unsigned char)((1.0f - candidate) * 100.0f);
+	unsigned char redColor = (unsigned char)(100.0f + 155.0f * candidate);
+
+	uchar4 finalColor = make_uchar4(redColor, greenColor, 0, 255);
+
+	baseX *= gPixelsPerCell;
+	baseY *= gPixelsPerCell;
+
+	for (int i = 0; i < gPixelsPerCell; ++i)
+		for (int j = 0; j < gPixelsPerCell; ++j)
+			pixelMemory[i + baseX + gScreenResolution * (j + baseY)] = finalColor;
+}
+
+
+void VisualizationHelper::VisualizeHotRegions(FloatArray deviceData, float maximumValue, uchar4* pixelMemory)
+{
+	assert(deviceData.m_array);
+	VisualizeHotRegionCuda  CUDA_DECORATOR_LOGIC(deviceData.m_array, deviceData.m_stride, maximumValue, pixelMemory);
 }
 
