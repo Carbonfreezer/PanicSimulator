@@ -7,34 +7,88 @@
 
 void CrowdPressure::ToolSystem()
 {
-	m_gradienModule.PreprareModule();
 	m_pressureArray = TransferHelper::ReserveFloatMemory();
 }
 
-__global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, float* gradientXVelocity, float* gradientYVelocity, float* result)
+__global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, float* velocityField, unsigned int* wallData,  float* result)
 {
+
+	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
+
+	
+	// We keep tack of the pixel  we are responsible for.
 	int xOrigin = threadIdx.x + gBlockSize * blockIdx.x + 1;
 	int yOrigin = threadIdx.y + gBlockSize * blockIdx.y + 1;
 
-	int totalIndex = xOrigin + strides * yOrigin;
+	int xScan = threadIdx.x + 1;
+	int yScan = threadIdx.y + 1;
 
-	float xGrad = gradientXVelocity[totalIndex];
-	float yGrad = gradientYVelocity[totalIndex];
+	int totalIndex = xOrigin + yOrigin * strides;
+
+	inputBuffer[xScan][yScan] = velocityField[totalIndex];
+
+	if (threadIdx.x == 0)
+		inputBuffer[0][yScan] = velocityField[(xOrigin - 1) + yOrigin * strides];
+	if (threadIdx.x == 31)
+		inputBuffer[xScan + 1][yScan] = velocityField[(xOrigin + 1) + yOrigin * strides];
+	if (threadIdx.y == 0)
+		inputBuffer[xScan][0] = velocityField[xOrigin + (yOrigin - 1)* strides];
+	if (threadIdx.y == 31)
+		inputBuffer[xScan][yScan + 1] = velocityField[xOrigin + (yOrigin + 1) * strides];
+
+	__syncthreads();
+
+	bool leftValid = (wallData[xOrigin - 1 + yOrigin * strides] != 0);
+	bool rightValid = (wallData[xOrigin + 1 + yOrigin * strides] != 0);
+	float xGrad = 0.0f;
+
+	if (leftValid && rightValid)
+	{
+		xGrad = (inputBuffer[xScan + 1][yScan] - inputBuffer[xScan - 1][yScan]) / (2.0f * gCellSize);
+	}
+	else if (rightValid)
+	{
+		xGrad = (inputBuffer[xScan][yScan] - inputBuffer[xScan - 1][yScan]) / (gCellSize);
+	}
+	else if (leftValid)
+	{
+		xGrad = (inputBuffer[xScan + 1][yScan] - inputBuffer[xScan][yScan]) / ( gCellSize);
+
+	}
+
+
+
+	bool topValid = (wallData[xOrigin + (yOrigin - 1)*strides] == 0);
+	bool bottomValid = (wallData[xOrigin + (yOrigin + 1) * strides] == 0);
+	float yGrad = 0.0f;
+
+	if (topValid && bottomValid)
+	{
+		yGrad = (inputBuffer[xScan][yScan + 1] - inputBuffer[xScan][yScan - 1]) / (2.0f * gCellSize);
+	}
+	else if (topValid)
+	{
+		yGrad = (inputBuffer[xScan][yScan] - inputBuffer[xScan][yScan - 1]) / (gCellSize);
+	}
+	else if (bottomValid)
+	{
+		yGrad = (inputBuffer[xScan][yScan + 1] - inputBuffer[xScan][yScan]) / (gCellSize);
+	}
+	
+	
 	
 	result[totalIndex] = densityField[totalIndex] * (xGrad * xGrad + yGrad * yGrad);
 }
 
 void CrowdPressure::ComputeCrowdPressure(FloatArray density, FloatArray velocity, DataBase* dataBase)
 {
-	// Get the gradient for the velocity.
-	m_gradienModule.ComputeGradient(velocity, dataBase->GetWallData());
-	FloatArray gradX = m_gradienModule.GetXComponent();
-	FloatArray gradY = m_gradienModule.GetYComponent();
-
-	assert(density.m_stride == gradX.m_stride);
-	assert(density.m_stride == gradY.m_stride);
+	
+	UnsignedArray wallData = dataBase->GetWallData();
+	
+	assert(density.m_stride == velocity.m_stride);
 	assert(density.m_stride == m_pressureArray.m_stride);
-
-	ComputeCrowdPressureCuda CUDA_DECORATOR_LOGIC (density.m_stride, density.m_array, gradX.m_array, gradY.m_array, m_pressureArray.m_array);
+	assert(density.m_stride == wallData.m_stride);
+	
+	ComputeCrowdPressureCuda CUDA_DECORATOR_LOGIC (density.m_stride, density.m_array, velocity.m_array,  wallData.m_array   ,m_pressureArray.m_array);
 	
 }

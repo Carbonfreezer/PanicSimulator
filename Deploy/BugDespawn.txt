@@ -1,7 +1,13 @@
-target: 	SourceLine.tga
-despawn: 	SourceLine.tga
-wall: 		WallSlit.tga
-density:	CenterBlob.tga
+target: 	BugDespawnTarget.tga
+# despawn: 	DuisburgWall.tga
+wall: 		BugDespawnWall.tga
+spawn:		BudDespawnSpawn.tga
+
+
+
+
+Spawn Density: 3 Person /sqm 
+
 
 Description:
 

@@ -90,7 +90,7 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 		break;
 
 	case 2:
-		VisualizationHelper::VisualizeScalarFieldAsGrey (densityField, gMaximumDensity , deviceMemory);
+		VisualizationHelper::VisualizeScalarFieldAsGrey (densityField, gMaximumDensity * 0.5f , deviceMemory);
 		VisualizationHelper::VisualizeHotRegions(m_crowdPressure.GetCrowdPressure(), gMaximumCrowdPressure, deviceMemory);
 		break;
 	}

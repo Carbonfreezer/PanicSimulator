@@ -4,7 +4,6 @@
 #include "IsoLineTest.h"
 #include "EikonalTest.h"
 #include "VelocityTest.h"
-#include "GradientTest.h"
 #include "ContinuityEquationTest.h"
 #include "SimulationCore.h"
 #include "LowPassFilterTest.h"
@@ -20,7 +19,6 @@ static FlagTest gFlagTest;
 static IsoLineTest gIsoLineTest;
 static EikonalTest gIconal;
 static VelocityTest gVelocity;
-static GradientTest gGradientTest;
 static ContinuityEquationTest gContinuityTest;
 static LowPassFilterTest gLowPassFilterTest;
 
@@ -170,18 +168,6 @@ void PrepareTestSuite(char choice, const char*& title, LogicClass*& usedLogic, B
 		usedLogic = &gVelocity;
 		fileNames.m_wallFile = "WallConvoluted.tga";
 		fileNames.m_initialDensityFile = "SpawnAreaCircular.tga";
-		break;
-	case 'L':
-		title = "Gradient Test 1";
-		usedLogic = &gGradientTest;
-		gGradientTest.PrepareTest(0);
-		fileNames.m_wallFile = "WallConvoluted.tga";
-		break;
-	case 'M':
-		title = "Gradient Test 2";
-		usedLogic = &gGradientTest;
-		gGradientTest.PrepareTest(1);
-		fileNames.m_wallFile = "WallConvoluted.tga";
 		break;
 	case 'N':
 		title = "Continuity Test 1";

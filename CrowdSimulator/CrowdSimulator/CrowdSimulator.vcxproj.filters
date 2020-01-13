@@ -13,9 +13,6 @@
     <CudaCompile Include="DensityManager.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
-    <CudaCompile Include="GradientModule.cu">
-      <Filter>SourceFiles</Filter>
-    </CudaCompile>
     <CudaCompile Include="ContinuityEquationSolver.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
@@ -29,6 +26,9 @@
       <Filter>SourceFiles</Filter>
     </CudaCompile>
     <CudaCompile Include="CrowdPressure.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
+    <CudaCompile Include="TimeToVelocityMapper.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -47,9 +47,6 @@
       <Filter>SourceFiles\SupportAndFramework</Filter>
     </ClCompile>
     <ClCompile Include="VelocityTest.cpp">
-      <Filter>SourceFiles\TestClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="GradientTest.cpp">
       <Filter>SourceFiles\TestClasses</Filter>
     </ClCompile>
     <ClCompile Include="ContinuityEquationTest.cpp">
@@ -111,12 +108,6 @@
     <ClInclude Include="VelocityTest.h">
       <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
-    <ClInclude Include="GradientModule.h">
-      <Filter>HeaderFiles</Filter>
-    </ClInclude>
-    <ClInclude Include="GradientTest.h">
-      <Filter>HeaderFiles\TestClasses</Filter>
-    </ClInclude>
     <ClInclude Include="ContinuityEquationSolver.h">
       <Filter>HeaderFiles</Filter>
     </ClInclude>
@@ -159,6 +150,7 @@
     <ClInclude Include="CrowdPressure.h">
       <Filter>HeaderFiles</Filter>
     </ClInclude>
+    <ClInclude Include="TimeToVelocityMapper.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="HeaderFiles">

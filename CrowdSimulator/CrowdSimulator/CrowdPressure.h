@@ -1,6 +1,8 @@
 #pragma once
 #include "MemoryStructs.h"
-#include "GradientModule.h"
+
+
+class DataBase;
 
 class CrowdPressure
 {
@@ -26,5 +28,4 @@ public:
 
 private:
 	FloatArray m_pressureArray;
-	GradientModule m_gradienModule;
 };

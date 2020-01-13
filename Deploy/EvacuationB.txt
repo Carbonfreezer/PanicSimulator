@@ -32,7 +32,7 @@ The keys are configured as follows:
 
 1: Show density
 2: Show velocity
-3: show crowd pressure (not yet implemented)
+3: show crowd pressure 
 e: toggle display iconal solution
 a: toggle annotation (white wall, green target area, yellow despawn area
 space: Pause and unpause simulation (resets simulation velocity factor)

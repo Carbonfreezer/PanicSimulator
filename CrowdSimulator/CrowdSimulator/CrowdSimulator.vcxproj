@@ -88,7 +88,6 @@
     <ClCompile Include="ContinuityEquationTest.cpp" />
     <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="FlagTest.cpp" />
-    <ClCompile Include="GradientTest.cpp" />
     <ClCompile Include="EikonalTest.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="IsoLineTest.cpp" />
@@ -100,9 +99,9 @@
     <CudaCompile Include="ContinuityEquationSolver.cu" />
     <CudaCompile Include="CrowdPressure.cu" />
     <CudaCompile Include="DensityManager.cu" />
-    <CudaCompile Include="GradientModule.cu" />
     <CudaCompile Include="EikonalSolver.cu" />
     <CudaCompile Include="LowPassFilter.cu" />
+    <CudaCompile Include="TimeToVelocityMapper.cu" />
     <CudaCompile Include="TransferHelper.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
@@ -125,8 +124,6 @@
     <ClInclude Include="FlagTest.h" />
     <ClInclude Include="FrameWork.h" />
     <ClInclude Include="GlobalConstants.h" />
-    <ClInclude Include="GradientModule.h" />
-    <ClInclude Include="GradientTest.h" />
     <ClInclude Include="ContinuityEquationTest.h" />
     <ClInclude Include="EikonalSolver.h" />
     <ClInclude Include="EikonalTest.h" />
@@ -138,6 +135,7 @@
     <ClInclude Include="MemoryStructs.h" />
     <ClInclude Include="SimulationCore.h" />
     <ClInclude Include="TgaReader.h" />
+    <ClInclude Include="TimeToVelocityMapper.h" />
     <ClInclude Include="TransferHelper.h" />
     <ClInclude Include="VelocityManager.h" />
     <ClInclude Include="VelocityTest.h" />

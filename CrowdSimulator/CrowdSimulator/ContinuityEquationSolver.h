@@ -1,5 +1,5 @@
 #pragma once
-#include "GradientModule.h"
+#include "TimeToVelocityMapper.h"
 class DataBase;
 
 /**
@@ -27,8 +27,8 @@ public:
 
 private:
 	// This contains the gradient of the eikonal equation.
-	GradientModule m_gradienEikonal;
-	// The buffer with the computed derivative Data..
-	FloatArray m_derivativeBuffer;
+	TimeToVelocityMapper m_timmeToVelocity;
+	// Buffer data
+	FloatArray m_bufferData;
 
 	};

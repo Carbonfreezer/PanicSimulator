@@ -56,7 +56,7 @@
 /**
  * \brief The maximal crowd pressure we assume for visualization purposes.
  */
-#define gMaximumCrowdPressure (gMaximumDensity * gMaximumWalkingVelocity * gMaximumWalkingVelocity / 7.0f)
+#define gMaximumCrowdPressure (gMaximumDensity * gMaximumWalkingVelocity * gMaximumWalkingVelocity / 2.0f)
 
 
 /**
