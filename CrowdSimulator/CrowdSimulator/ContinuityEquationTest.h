@@ -34,8 +34,7 @@ public:
 private:
 	
 	FloatArray m_pseudoIconalData;
-	FloatArray m_densityData;
-	
+
 	ContinuityEquationSolver m_solver;
 
 	

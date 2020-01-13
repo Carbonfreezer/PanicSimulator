@@ -29,20 +29,19 @@ void ContinuityEquationTest::PrepareTest(int eikonalMode)
 		m_pseudoIconalData = TransferHelper::BuildRadialGradient(50.0f, 1);
 		break;
 	}
-	
-	m_densityData = TransferHelper::ReserveFloatMemory();
+
 
 }
 
 void ContinuityEquationTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_solver.IntegrateEquation(timePassedInSeconds, m_densityData,  m_pseudoIconalData, dataBase);
-	VisualizationHelper::VisualizeScalarField(m_densityData, gMaximumDensity, deviceMemory);
+	m_solver.IntegrateEquation(timePassedInSeconds,  m_pseudoIconalData, dataBase);
+	VisualizationHelper::VisualizeScalarField(m_solver.GetCurrentDensityField(), gMaximumDensity, deviceMemory);
 }
 
 void ContinuityEquationTest::ToolSystem(DataBase* dataBase)
 {
 	// Copy over the density data.
-	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_densityData);
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_solver.GetCurrentDensityField());
 }
 

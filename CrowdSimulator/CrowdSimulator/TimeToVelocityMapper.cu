@@ -25,6 +25,7 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 	unsigned int* extremPointInfo, size_t strides)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
+	__shared__ unsigned int locallyBlockedField[gBlockSize + 2][gBlockSize + 2];
 
 
 	// We keep tack of the pixel  we are responsible for.
@@ -35,32 +36,38 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 	int yScan = threadIdx.y + 1;
 
 	inputBuffer[xScan][yScan] = inputField[xOrigin + yOrigin * strides];
+	locallyBlockedField[xScan][yScan] = blockedField[xOrigin + yOrigin * strides];
 
 	if (threadIdx.x == 0)
+	{
 		inputBuffer[0][yScan] = inputField[(xOrigin - 1) + yOrigin * strides];
+		locallyBlockedField[0][yScan] = blockedField[(xOrigin - 1) + yOrigin * strides];
+	}
 	if (threadIdx.x == 31)
+	{
 		inputBuffer[xScan + 1][yScan] = inputField[(xOrigin + 1) + yOrigin * strides];
+		locallyBlockedField[xScan + 1][yScan] = blockedField[(xOrigin + 1) + yOrigin * strides];
+	}
 	if (threadIdx.y == 0)
+	{
 		inputBuffer[xScan][0] = inputField[xOrigin + (yOrigin - 1)* strides];
+		locallyBlockedField[xScan][0] = blockedField[xOrigin + (yOrigin - 1)* strides];
+	}
 	if (threadIdx.y == 31)
+	{
 		inputBuffer[xScan][yScan + 1] = inputField[xOrigin + (yOrigin + 1) * strides];
+		locallyBlockedField[xScan][yScan + 1] = blockedField[xOrigin + (yOrigin + 1) * strides];
+	}
 
 	__syncthreads();
 
-	/*
-	if (blockedField[xOrigin + yOrigin * strides] != 0)
-	{
-		velocityX[xOrigin + yOrigin * strides] = 0.0f;
-		velocityY[xOrigin + yOrigin * strides] = 0.0f;
-		return;
-	}
-	*/
+	
 
 	int localExtremum = 0;
 
 	// We start with the x component.
-	bool leftValid = ((xOrigin != 1) && (blockedField[(xOrigin - 1) + yOrigin * strides]) == 0);
-	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (blockedField[(xOrigin + 1) + yOrigin * strides]) == 0);
+	bool leftValid = ((xOrigin != 1) && (locallyBlockedField[xScan - 1][yScan] == 0));
+	bool rightValid = ((xOrigin != gGridSizeExternal - 2) && (locallyBlockedField[xScan + 1][yScan] == 0));
 	float xDerivative = 0.0f;
 
 	if (rightValid && leftValid)
@@ -86,8 +93,8 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 
 
 	// Now the same with the y component.
-	bool topValid = ((yOrigin != 1) && (blockedField[xOrigin + (yOrigin - 1) * strides]) == 0);
-	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (blockedField[xOrigin + (yOrigin + 1) * strides]) == 0);
+	bool topValid = ((yOrigin != 1) && (locallyBlockedField[xScan][yScan - 1] == 0));
+	bool bottomValid = ((yOrigin != gGridSizeExternal - 2) && (locallyBlockedField[xScan][yScan + 1] == 0));
 	float yDerivative = 0.0f;
 
 	if (topValid && bottomValid)

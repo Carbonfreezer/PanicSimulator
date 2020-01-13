@@ -10,9 +10,9 @@
 
 void DensityManager::InitializeManager(DataBase* dataBase)
 {
-	m_density = TransferHelper::ReserveFloatMemory();
-	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
 	m_continuitySolver.PrepareSolver();
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_continuitySolver.GetCurrentDensityField());
+
 }
 
 __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity,  float* spawnArea, size_t strideSpawn,
@@ -61,7 +61,8 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity,  flo
 
 void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 {
-	ApplyConditions  CUDA_DECORATOR_LOGIC (m_density.m_array, m_density.m_stride,
+	FloatArray density = m_continuitySolver.GetCurrentDensityField();
+	ApplyConditions  CUDA_DECORATOR_LOGIC (density.m_array, density.m_stride,
 		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
 		dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride);
 }
@@ -70,15 +71,15 @@ void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
 
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {
-	VisualizationHelper::VisualizeScalarField(m_density, gMaximumDensity,  textureMemory);
+	VisualizationHelper::VisualizeScalarField(m_continuitySolver.GetCurrentDensityField(), gMaximumDensity,  textureMemory);
 }
 
 void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField,  DataBase* dataBase)
 {
-	m_continuitySolver.IntegrateEquation(timePassed, m_density,  timeField, dataBase);
+	m_continuitySolver.IntegrateEquation(timePassed,  timeField, dataBase);
 }
 
 void DensityManager::ResetDensity(DataBase* dataBase)
 {
-	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_density);
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_continuitySolver.GetCurrentDensityField());
 }

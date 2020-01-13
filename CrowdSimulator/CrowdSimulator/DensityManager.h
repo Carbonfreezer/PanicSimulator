@@ -29,7 +29,7 @@ public:
 	 * \brief Gets the density field.
 	 * \return Current density field.
 	 */
-	FloatArray GetDensityField() { return m_density; }
+	FloatArray GetDensityField() { return m_continuitySolver.GetCurrentDensityField(); }
 
 	/**
 	 * \brief Enforces the current information on spawn, target and wall information (handed over)
@@ -62,7 +62,6 @@ public:
 
 private:
 
-	FloatArray m_density;
 	ContinuityEquationSolver m_continuitySolver;
 	
 };

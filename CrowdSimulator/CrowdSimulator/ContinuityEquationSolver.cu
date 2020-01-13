@@ -11,8 +11,10 @@
 
 void ContinuityEquationSolver::PrepareSolver()
 {
-	m_timmeToVelocity.PreprareModule();
-	m_bufferData = TransferHelper::ReserveFloatMemory();
+	m_timeToVelocity.PreprareModule();
+	m_currentDensityField[0] = TransferHelper::ReserveFloatMemory();
+	m_currentDensityField[1] = TransferHelper::ReserveFloatMemory();
+	m_currentFieldValid = 0;
 }
 
 
@@ -147,19 +149,18 @@ __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* d
 
 
 
-void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray density,  FloatArray timeToDestination, DataBase* dataBase)
+void ContinuityEquationSolver::IntegrateEquation(float timePassed,   FloatArray timeToDestination, DataBase* dataBase)
 {
 
 	UnsignedArray wallData = dataBase->GetWallData();
 	// First we need the gradient of the iconal equation.
-	m_timmeToVelocity.ComputeVelocity(timeToDestination, wallData);
+	m_timeToVelocity.ComputeVelocity(timeToDestination, wallData);
 
-	FloatArray velX = m_timmeToVelocity.GetXComponent();
-	FloatArray velY = m_timmeToVelocity.GetYComponent();
-	UnsignedArray extremPoint = m_timmeToVelocity.GerExtremPointInformation();
+	FloatArray velX = m_timeToVelocity.GetXComponent();
+	FloatArray velY = m_timeToVelocity.GetYComponent();
+	UnsignedArray extremPoint = m_timeToVelocity.GerExtremPointInformation();
 	assert(velX.m_stride == velY.m_stride);
-	assert(velX.m_stride == density.m_stride);
-	assert(velX.m_stride == m_bufferData.m_stride);
+	assert(velX.m_stride == m_currentDensityField[0].m_stride);
 	assert(velX.m_stride == wallData.m_stride);
 	assert(velX.m_stride == extremPoint.m_stride);
 
@@ -178,9 +179,10 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed, FloatArray de
 			localTimeStep = timePassed;
 		}
 
-		IntegrateEquationCuda CUDA_DECORATOR_LOGIC (localTimeStep, density.m_stride, density.m_array, velX.m_array, velY.m_array,extremPoint.m_array, wallData.m_array,  m_bufferData.m_array);
-		TransferHelper::CopyDataFromTo(m_bufferData, density);
-		
+		IntegrateEquationCuda CUDA_DECORATOR_LOGIC (localTimeStep, velX.m_stride, m_currentDensityField[m_currentFieldValid].m_array, 
+			velX.m_array, velY.m_array,extremPoint.m_array, wallData.m_array, m_currentDensityField[1 - m_currentFieldValid].m_array);
+
+		m_currentFieldValid = 1 - m_currentFieldValid;
 	}
 
 		

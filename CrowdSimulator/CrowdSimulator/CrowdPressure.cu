@@ -14,6 +14,7 @@ __global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, fl
 {
 
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
+	__shared__ unsigned int locallyBlockedField[gBlockSize + 2][gBlockSize + 2];
 
 	
 	// We keep tack of the pixel  we are responsible for.
@@ -26,20 +27,33 @@ __global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, fl
 	int totalIndex = xOrigin + yOrigin * strides;
 
 	inputBuffer[xScan][yScan] = velocityField[totalIndex];
+	locallyBlockedField[xScan][yScan] = wallData[totalIndex];
 
 	if (threadIdx.x == 0)
+	{
 		inputBuffer[0][yScan] = velocityField[(xOrigin - 1) + yOrigin * strides];
+		locallyBlockedField[0][yScan] = wallData[(xOrigin - 1) + yOrigin * strides];
+	}
 	if (threadIdx.x == 31)
+	{
 		inputBuffer[xScan + 1][yScan] = velocityField[(xOrigin + 1) + yOrigin * strides];
+		locallyBlockedField[xScan + 1][yScan] = wallData[(xOrigin + 1) + yOrigin * strides];
+	}
 	if (threadIdx.y == 0)
+	{
 		inputBuffer[xScan][0] = velocityField[xOrigin + (yOrigin - 1)* strides];
+		locallyBlockedField[xScan][0] = wallData[xOrigin + (yOrigin - 1)* strides];
+	}
 	if (threadIdx.y == 31)
+	{
 		inputBuffer[xScan][yScan + 1] = velocityField[xOrigin + (yOrigin + 1) * strides];
+		locallyBlockedField[xScan][yScan + 1] = wallData[xOrigin + (yOrigin + 1) * strides];
+	}
 
 	__syncthreads();
 
-	bool leftValid = (wallData[xOrigin - 1 + yOrigin * strides] != 0);
-	bool rightValid = (wallData[xOrigin + 1 + yOrigin * strides] != 0);
+	bool leftValid = (locallyBlockedField[xScan - 1][yScan] != 0);
+	bool rightValid = (locallyBlockedField[xScan + 1][yScan] != 0);
 	float xGrad = 0.0f;
 
 	if (leftValid && rightValid)
@@ -58,8 +72,8 @@ __global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, fl
 
 
 
-	bool topValid = (wallData[xOrigin + (yOrigin - 1)*strides] == 0);
-	bool bottomValid = (wallData[xOrigin + (yOrigin + 1) * strides] == 0);
+	bool topValid = (locallyBlockedField[xScan][yScan - 1] == 0);
+	bool bottomValid = (locallyBlockedField[xScan][yScan + 1] == 0);
 	float yGrad = 0.0f;
 
 	if (topValid && bottomValid)
