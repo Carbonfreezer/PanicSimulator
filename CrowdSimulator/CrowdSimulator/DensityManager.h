@@ -34,8 +34,9 @@ public:
 	/**
 	 * \brief Enforces the current information on spawn, target and wall information (handed over)
 	 * \param dataBase Contains all the boundary conditions.
+	 * \param timePassed The time passed needed for the spawning.
 	 */
-	void EnforceBoundaryConditions(DataBase* dataBase);
+	void EnforceBoundaryConditions(DataBase* dataBase, float timePassed);
 
 	// 
 	/**

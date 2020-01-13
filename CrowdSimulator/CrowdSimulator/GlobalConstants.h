@@ -56,7 +56,12 @@
 /**
  * \brief The maximal crowd pressure we assume for visualization purposes.
  */
-#define gMaximumCrowdPressure (gMaximumDensity * gMaximumWalkingVelocity * gMaximumWalkingVelocity / 2.0f)
+#define gMaximumCrowdPressure (gMaximumDensity * gMaximumWalkingVelocity * gMaximumWalkingVelocity / 4.0f)
+
+/**
+ * \brief The maximum amount of persons we spawn per square meter and second.
+ */
+#define gMaximumSpawnRate 0.5f
 
 
 /**

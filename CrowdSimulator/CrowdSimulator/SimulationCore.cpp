@@ -59,7 +59,7 @@ void SimulationCore::HandleInput(InputSystem* input, DataBase* dataBase)
 void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	// Make sure people get spawned and despawned at the correct locations.
-	m_density.EnforceBoundaryConditions(dataBase);
+	m_density.EnforceBoundaryConditions(dataBase, timePassedInSeconds * m_simulationFactor);
 	FloatArray densityField = m_density.GetDensityField();
 
 	// Now we feed the density into the velocity system.

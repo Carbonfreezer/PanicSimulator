@@ -15,7 +15,7 @@ void DensityManager::InitializeManager(DataBase* dataBase)
 
 }
 
-__global__ void ApplyConditions(float* densityBuffer, size_t strideDensity,  float* spawnArea, size_t strideSpawn,
+__global__ void ApplyConditions(float timePassed, float* densityBuffer, size_t strideDensity,  float* spawnArea, size_t strideSpawn,
                     unsigned int* despawnData, size_t despawnStride)
 {
 	int xRead = threadIdx.x + blockIdx.x * blockDim.x + 1;
@@ -50,19 +50,17 @@ __global__ void ApplyConditions(float* densityBuffer, size_t strideDensity,  flo
 	} else
 	{
 		// Build the maximum, there may already be other people walking through the spawn area.
-		float spawnValue = spawnArea[xRead + yRead * strideSpawn];
-		if (spawnValue > 0.001f)
-			densityBuffer[xRead + strideDensity * yRead] = fmaxf(densityBuffer[xRead + strideDensity * yRead], spawnValue);
+		densityBuffer[xRead + strideDensity * yRead] += spawnArea[xRead + yRead * strideSpawn] * timePassed * gMaximumSpawnRate;
 	}
 
 	
 
 }
 
-void DensityManager::EnforceBoundaryConditions(DataBase* dataBase)
+void DensityManager::EnforceBoundaryConditions(DataBase* dataBase, float timePassed)
 {
 	FloatArray density = m_continuitySolver.GetCurrentDensityField();
-	ApplyConditions  CUDA_DECORATOR_LOGIC (density.m_array, density.m_stride,
+	ApplyConditions  CUDA_DECORATOR_LOGIC (timePassed, density.m_array, density.m_stride,
 		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
 		dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride);
 }

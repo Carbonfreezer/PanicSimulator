@@ -1,12 +1,14 @@
 target: 	DuisburgTarget.tga
-# despawn: 	DuisburgWall.tga
+despawn: 	DuisburgTarget.tga
 wall: 		DuisburgWall.tga
 spawn:		DuisburgSpawn.tga
 
 
 
 
-Spawn Density: 3 Person /sqm 
+Side Corridor existing,
+
+Corridor 8 persons per second enter corridor.
 
 
 Description:

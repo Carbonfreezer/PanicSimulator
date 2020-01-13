@@ -13,7 +13,7 @@ void EikonalTest::ToolSystem(DataBase* dataBase)
 
 void EikonalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
-	m_densityManager.EnforceBoundaryConditions(dataBase);
+	m_densityManager.EnforceBoundaryConditions(dataBase, timePassedInSeconds);
 	FloatArray densityField = m_densityManager.GetDensityField();
 	m_velocityManager.UpdateVelocityField(densityField,dataBase);
 
