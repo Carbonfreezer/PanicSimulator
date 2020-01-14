@@ -102,9 +102,7 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 	if (m_showsAnnotation)
 	{
 		VisualizationHelper::MarcColor(dataBase->GetWallData(), make_uchar4(255, 255, 255, 255), deviceMemory);
-		VisualizationHelper::MarcColor(dataBase->GetDespawnData(), make_uchar4(255, 255, 0, 255), deviceMemory);
 		VisualizationHelper::MarcColor(dataBase->GetTargetData(), make_uchar4(0, 255, 0, 255), deviceMemory);
-
 	}
 	
 }

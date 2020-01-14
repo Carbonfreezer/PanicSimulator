@@ -62,7 +62,7 @@ void DensityManager::EnforceBoundaryConditions(DataBase* dataBase, float timePas
 	FloatArray density = m_continuitySolver.GetCurrentDensityField();
 	ApplyConditions  CUDA_DECORATOR_LOGIC (timePassed, density.m_array, density.m_stride,
 		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
-		dataBase->GetDespawnData().m_array, dataBase->GetDespawnData().m_stride);
+		dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
 }
 
 

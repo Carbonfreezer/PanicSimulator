@@ -13,7 +13,6 @@ void DataBase::LoadFiles(BaseFileNames filenames)
 
 	m_wallData = DefaultLoadUnsigned(filenames.m_wallFile);
 	m_targetData = DefaultLoadUnsigned(filenames.m_targetFile);
-	m_despawnData = DefaultLoadUnsigned(filenames.m_despawnFile);
 
 	m_spawnData = DefaultLoadFloat(filenames.m_spawnFile);
 	m_initialDensityData = DefaultLoadFloat(filenames.m_initialDensityFile);
@@ -26,7 +25,6 @@ void DataBase::FreeResources()
 
 	m_wallData.FreeArray();
 	m_targetData.FreeArray();
-	m_despawnData.FreeArray();
 }
 
 UnsignedArray DataBase::DefaultLoadUnsigned(const char* fileName)

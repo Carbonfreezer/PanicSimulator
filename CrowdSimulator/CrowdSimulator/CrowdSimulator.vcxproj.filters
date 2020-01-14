@@ -150,7 +150,9 @@
     <ClInclude Include="CrowdPressure.h">
       <Filter>HeaderFiles</Filter>
     </ClInclude>
-    <ClInclude Include="TimeToVelocityMapper.h" />
+    <ClInclude Include="TimeToVelocityMapper.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="HeaderFiles">

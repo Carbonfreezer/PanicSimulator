@@ -9,7 +9,7 @@
  */
 struct BaseFileNames
 {
-	BaseFileNames() : m_wallFile(NULL), m_targetFile(NULL), m_spawnFile(NULL), m_despawnFile(NULL), m_initialDensityFile(NULL) {}
+	BaseFileNames() : m_wallFile(NULL), m_targetFile(NULL), m_spawnFile(NULL),  m_initialDensityFile(NULL) {}
 
 	
 	/**
@@ -26,7 +26,7 @@ struct BaseFileNames
 
 	
 	/**
-	 * \brief Filename with information for the target info (binary)
+	 * \brief Filename with information for the target info (binary). People also despawn here.
 	 */
 	const char* m_targetFile;
 
@@ -36,10 +36,6 @@ struct BaseFileNames
 	 */
 	const char* m_spawnFile;
 	
-	/**
-	 * \brief Information for the area with despawn information (binary)
-	 */
-	const char* m_despawnFile;
 	
 	/**
 	 * \brief Filename for the initial density information (non binary)
@@ -52,6 +48,5 @@ private:
 	std::string m_internallWallFile;
 	std::string m_internalTargetFile;
 	std::string m_internalSpawnFile;
-	std::string m_internalDespawnFile;
 	std::string m_internalDensityFile;
 };

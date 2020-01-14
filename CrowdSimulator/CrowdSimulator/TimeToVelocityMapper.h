@@ -29,8 +29,9 @@ public:
 	 * \brief Gets the velocity.
 	 * \param inputField Scalar field to compute gradient from.
 	 * \param blockedElements Indicates which elements not to use for the gradient computation.
+	 * \param targetElements The target elements where the velocity vector is forced to be zero. 
 	 */
-	void ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements);
+	void ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements, UnsignedArray targetElements);
 
 
 

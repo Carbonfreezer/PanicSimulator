@@ -41,11 +41,6 @@ void BaseFileNames::LoadFilenames(const char* initializationFile)
 			m_spawnFile = m_internalSpawnFile.c_str();
 		}
 
-		if (key == "despawn")
-		{
-			m_internalDespawnFile = file;
-			m_despawnFile = m_internalDespawnFile.c_str();
-		}
 
 		if (key == "density")
 		{

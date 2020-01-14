@@ -154,7 +154,7 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed,   FloatArray 
 
 	UnsignedArray wallData = dataBase->GetWallData();
 	// First we need the gradient of the iconal equation.
-	m_timeToVelocity.ComputeVelocity(timeToDestination, wallData);
+	m_timeToVelocity.ComputeVelocity(timeToDestination, wallData, dataBase->GetTargetData());
 
 	FloatArray velX = m_timeToVelocity.GetXComponent();
 	FloatArray velY = m_timeToVelocity.GetYComponent();

@@ -49,16 +49,12 @@ public:
 
 	/**
 	 * \brief Contains target data where people try to walk to. (digital)
+	 * People also despawn here.
 	 * \return The target data.
 	 */
 	UnsignedArray GetTargetData() { return  m_targetData; }
 
 	
-	/**
-	 * \brief Gets the information where people should despawn (digital)
-	 * \return The information where people should despawn.
-	 */
-	UnsignedArray GetDespawnData() { return m_despawnData; }
 	
 private:
 	bool m_alreadyLoaded;
@@ -70,7 +66,6 @@ private:
 
 	UnsignedArray m_wallData;
 	UnsignedArray m_targetData;
-	UnsignedArray m_despawnData;
 	UnsignedArray m_wallDespawn;
 
 

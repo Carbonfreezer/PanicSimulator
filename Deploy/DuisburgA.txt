@@ -1,5 +1,4 @@
 target: 	DuisburgTarget.tga
-despawn: 	DuisburgTarget.tga
 wall: 		DuisburgWall.tga
 spawn:		DuisburgSpawn.tga
 
@@ -20,7 +19,6 @@ Searched for keywords are:
 wall   Targa file indicating the wall information (binary)
 target Targa file indicating the target information (binary)
 spawn  Targa file indicating spawn information (continiuos)
-despawn Targa file indicating despawn information (binary)
 density Targa file indicating initial density information (continuos)
 
 All Targa files must not have an alpha channel must not be RLE encoded and must have a size of  288 by 288 pixels.

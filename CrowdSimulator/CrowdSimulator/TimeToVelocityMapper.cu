@@ -21,7 +21,7 @@ void TimeToVelocityMapper::PreprareModule()
 	assert(m_extremPoint.m_stride == m_velocityXResult.m_stride);
 }
 
-__global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedField,  float* velocityX, float* velocityY,
+__global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedField, unsigned int* targetField,  float* velocityX, float* velocityY,
 	unsigned int* extremPointInfo, size_t strides)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
@@ -134,6 +134,12 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 	if (isnan(xVelocity))
 		xVelocity = 0.0f;
 
+	if (targetField[xOrigin + yOrigin * strides] != 0)
+	{
+		xVelocity = 0.0f;
+		yVelocity = 0.0f;
+	}
+
 	velocityX[xOrigin + yOrigin * strides] = xVelocity;
 	velocityY[xOrigin + yOrigin * strides] = yVelocity;
 
@@ -141,13 +147,14 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 
 }
 
-void TimeToVelocityMapper::ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements)
+void TimeToVelocityMapper::ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements, UnsignedArray targetElements)
 {
 	assert(m_velocityXResult.m_array);
 	assert(m_velocityXResult.m_array);
 	assert(inputField.m_stride == blockedElements.m_stride);
 	assert(inputField.m_stride == m_velocityXResult.m_stride);
-	ComputeVelocityCuda CUDA_DECORATOR_LOGIC(inputField.m_array, blockedElements.m_array, 
+	assert(targetElements.m_stride == m_velocityXResult.m_stride);
+	ComputeVelocityCuda CUDA_DECORATOR_LOGIC(inputField.m_array, blockedElements.m_array, targetElements.m_array,
 		m_velocityXResult.m_array, m_velocityYResult.m_array, m_extremPoint.m_array, m_velocityXResult.m_stride);
 
 }
