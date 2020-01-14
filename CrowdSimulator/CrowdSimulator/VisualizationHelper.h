@@ -74,6 +74,11 @@ public:
 	 */
 	static void VisualizeIsoLines(FloatArray deviceData, float isoLineStepSize, uchar4* pixelMemory);
 
+	/**
+	 * \brief Frees all the used resources.
+	 */
+	static void FreeResources() { m_isoLineData.FreeArray(); }
+
 private:
 	// Data on GPU for iso line buffering.
 	static FloatArray m_isoLineData;

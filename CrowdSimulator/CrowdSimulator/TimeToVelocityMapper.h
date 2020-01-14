@@ -23,6 +23,10 @@ public:
 	 */
 	void PreprareModule();
 
+	/**
+	 * \brief Frees all the reources from the graphics card.
+	 */
+	void FreeResources();
 
 
 	/**
@@ -57,7 +61,6 @@ public:
 	 */
 	UnsignedArray GerExtremPointInformation() { return m_extremPoint; }
 
-	
 
 private:
 	FloatArray m_velocityXResult;

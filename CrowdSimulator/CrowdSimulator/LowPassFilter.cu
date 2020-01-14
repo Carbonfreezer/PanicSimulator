@@ -17,6 +17,11 @@ void LowPassFilter::PrepareModule()
 	m_result = TransferHelper::ReserveFloatMemory();
 }
 
+void LowPassFilter::FreeResources()
+{
+	m_result.FreeArray();
+}
+
 __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned int* blocked, size_t blockedStride)
 {
 	// We want to low pass filter the stuff.
@@ -70,7 +75,8 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 		blockedBuffer[0][gBlockSize + 1] = blocked[(xOrigin - 1) + (yOrigin  + gBlockSize) * blockedStride];
 
 		valueBuffer[gBlockSize + 1][gBlockSize + 1] = input[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * stride];
-		blockedBuffer[gBlockSize + 1][gBlockSize + 1] = blocked[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) * blockedStride];
+		blockedBuffer[gBlockSize + 1][gBlockSize + 1] = blocked[(xOrigin + gBlockSize) + (yOrigin + gBlockSize) *
+			blockedStride];
 	}
 
 	__syncthreads();
@@ -88,7 +94,8 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 	for (int j = -1; j < 2; ++j)
 		for (int i = -1; i < 2; ++i)
 		{
-			if ((blockedBuffer[xScan + i][yScan + j]) || (xOrigin + i == 0) || (yOrigin + j == 0) || (xOrigin + i == gGridSizeExternal - 1) || (yOrigin + j == gGridSizeExternal - 1))
+			if ((blockedBuffer[xScan + i][yScan + j]) || (xOrigin + i == 0) || (yOrigin + j == 0) || (xOrigin + i ==
+				gGridSizeExternal - 1) || (yOrigin + j == gGridSizeExternal - 1))
 				continue;
 			
 			float localWeight = convolutionKernel[i + 1][j + 1];
@@ -104,7 +111,8 @@ __global__ void CudaFilter(float* input, float* output, size_t stride, unsigned 
 void LowPassFilter::Filter(FloatArray inputField, UnsignedArray blockedElements)
 {
 	assert(inputField.m_stride == m_result.m_stride);
-	CudaFilter CUDA_DECORATOR_LOGIC (inputField.m_array, m_result.m_array, m_result.m_stride, blockedElements.m_array, blockedElements.m_stride);
+	CudaFilter CUDA_DECORATOR_LOGIC (inputField.m_array, m_result.m_array, m_result.m_stride, blockedElements.m_array,
+	                                 blockedElements.m_stride);
 }
 
 

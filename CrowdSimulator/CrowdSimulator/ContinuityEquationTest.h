@@ -17,6 +17,11 @@ public:
 	void PrepareTest(int eikonalMode);
 
 	/**
+	* \brief Frees all the resources currently allocated on the graphics card.
+	*/
+	virtual void FreeResources();
+
+	/**
 	 * \brief Is called for update and effectively rendering.
 	 * \param deviceMemory The texture memory we write our data to.
 	 * \param timePassedInSeconds The time in seconds passed since last update.

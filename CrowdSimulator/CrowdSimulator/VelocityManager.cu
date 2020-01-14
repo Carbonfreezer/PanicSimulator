@@ -15,8 +15,14 @@ void VelocityManager::GenerateVelocityField()
 	m_velocityField = TransferHelper::ReserveFloatMemory();
 }
 
+void VelocityManager::FreeResources()
+{
+	m_velocityField.FreeArray();
+}
 
-__global__ void UpdateVelocity(float* velocityField, size_t velocityStride, float* densityField, size_t density_stride, unsigned* wallArea, size_t wallStride)
+
+__global__ void UpdateVelocity(float* velocityField, size_t velocityStride, float* densityField, size_t density_stride,
+                               unsigned* wallArea, size_t wallStride)
 {
 	int xRead = threadIdx.x + blockIdx.x * blockDim.x + 1;
 	int yRead = threadIdx.y + blockIdx.y * blockDim.y + 1;
@@ -57,7 +63,8 @@ __global__ void UpdateVelocity(float* velocityField, size_t velocityStride, floa
 		{
 			int baseCounter = (int)floorf(density * 2.0f);
 			float alpha = (density - 0.5f * baseCounter) * 2.0f;
-			velocityField[xRead + yRead * velocityStride] = alpha * m_velocityLookupTable[baseCounter + 1] + (1.0f - alpha) * m_velocityLookupTable[baseCounter];
+			velocityField[xRead + yRead * velocityStride] = alpha * m_velocityLookupTable[baseCounter + 1] + (1.0f -
+				alpha) * m_velocityLookupTable[baseCounter];
 		}
 
 	}
@@ -67,7 +74,8 @@ void VelocityManager::UpdateVelocityField(FloatArray density, DataBase* dataBase
 {
 	assert(m_velocityField.m_array);
 	UpdateVelocity CUDA_DECORATOR_LOGIC(m_velocityField.m_array, m_velocityField.m_stride,
-		density.m_array, density.m_stride, dataBase->GetWallData().m_array, dataBase->GetWallData().m_stride);
+	                                    density.m_array, density.m_stride, dataBase->GetWallData().m_array,
+	                                    dataBase->GetWallData().m_stride);
 }
 
 

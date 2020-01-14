@@ -33,6 +33,12 @@ void ContinuityEquationTest::PrepareTest(int eikonalMode)
 
 }
 
+void ContinuityEquationTest::FreeResources()
+{
+	m_pseudoIconalData.FreeArray();
+	m_solver.FreeResources();
+}
+
 void ContinuityEquationTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	m_solver.IntegrateEquation(timePassedInSeconds,  m_pseudoIconalData, dataBase);

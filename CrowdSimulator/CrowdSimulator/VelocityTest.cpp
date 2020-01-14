@@ -7,6 +7,11 @@ void VelocityTest::ToolSystem(DataBase* dataBase)
 	m_velocityManager.GenerateVelocityField();
 }
 
+void VelocityTest::FreeResources()
+{
+	m_velocityManager.FreeResources();
+}
+
 void VelocityTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	// We can take the initial density here, because it is not updated.

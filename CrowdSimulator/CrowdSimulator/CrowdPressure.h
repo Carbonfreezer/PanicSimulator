@@ -13,6 +13,11 @@ public:
 	void ToolSystem();
 
 	/**
+	 * \brief Free all resources from the graphics card.
+	 */
+	void FreeResources();
+	
+	/**
 	 * \brief Creates the crowd pressure from the density and velocity magnitude information.
 	 * \param density The density we calculate the pressure from.
 	 * \param velocity The velocity information we calculate pressure from.
@@ -25,6 +30,7 @@ public:
 	 * \return Last computed crowd pressure.
 	 */
 	FloatArray GetCrowdPressure() { return m_pressureArray; }
+	
 
 private:
 	FloatArray m_pressureArray;

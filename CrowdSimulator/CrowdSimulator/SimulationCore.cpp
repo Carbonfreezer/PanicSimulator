@@ -21,6 +21,18 @@ void SimulationCore::ToolSystem(DataBase* dataBase)
 
 }
 
+void SimulationCore::FreeResources()
+{
+	m_velocity.FreeResources();
+	m_density.FreeResources();
+	m_eikonalSolver.FreeResources();
+	m_velocityFilter[0].FreeResources();
+	m_velocityFilter[1].FreeResources();
+	m_timeFilter[0].FreeResources();
+	m_timeFilter[1].FreeResources();
+	m_crowdPressure.FreeResources();
+}
+
 void SimulationCore::HandleInput(InputSystem* input, DataBase* dataBase)
 {
 	if (input->WasResetToggled())

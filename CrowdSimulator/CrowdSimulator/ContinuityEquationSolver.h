@@ -14,6 +14,12 @@ public:
 	 */
 	void PrepareSolver();
 
+
+	/**
+	 * \brief Frees all the resources from the GPU.
+	 */
+	void FreeResources();
+
 	// 
 	/**
 	 * \brief Integrate the continuity equation and modifies the density field. 

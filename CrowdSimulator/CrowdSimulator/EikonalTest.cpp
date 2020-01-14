@@ -11,6 +11,13 @@ void EikonalTest::ToolSystem(DataBase* dataBase)
 	m_solver.PrepareSolving();
 }
 
+void EikonalTest::FreeResources()
+{
+	m_velocityManager.FreeResources();
+	m_densityManager.FreeResources();
+	m_solver.FreeResources();
+}
+
 void EikonalTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	m_densityManager.EnforceBoundaryConditions(dataBase, timePassedInSeconds);

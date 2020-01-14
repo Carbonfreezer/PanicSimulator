@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cassert>
 #include "GlobalConstants.h"
-
+#include "VisualizationHelper.h"
 
 
 void FrameWork::InitializeFramework(LogicClass* usedLogic, const char* windowTitle, BaseFileNames fileNames)
@@ -61,6 +61,8 @@ void FrameWork::RunCoreLoop()
 void FrameWork::ShutdownFramework()
 {
 	m_usedDataBase.FreeResources();
+	m_usedLogic->FreeResources();
+	VisualizationHelper::FreeResources();
 	cudaDeviceReset();
 	glfwTerminate();
 	

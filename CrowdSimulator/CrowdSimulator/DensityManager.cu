@@ -15,8 +15,14 @@ void DensityManager::InitializeManager(DataBase* dataBase)
 
 }
 
-__global__ void ApplyConditions(float timePassed, float* densityBuffer, size_t strideDensity,  float* spawnArea, size_t strideSpawn,
-                    unsigned int* despawnData, size_t despawnStride)
+void DensityManager::FreeResources()
+{
+	m_continuitySolver.FreeResources();
+}
+
+__global__ void ApplyConditions(float timePassed, float* densityBuffer, size_t strideDensity,  float* spawnArea,
+                                size_t strideSpawn,
+                                unsigned int* despawnData, size_t despawnStride)
 {
 	int xRead = threadIdx.x + blockIdx.x * blockDim.x + 1;
 	int yRead = threadIdx.y + blockIdx.y * blockDim.y + 1;
@@ -50,7 +56,8 @@ __global__ void ApplyConditions(float timePassed, float* densityBuffer, size_t s
 	} else
 	{
 		// Build the maximum, there may already be other people walking through the spawn area.
-		densityBuffer[xRead + strideDensity * yRead] += spawnArea[xRead + yRead * strideSpawn] * timePassed * gMaximumSpawnRate;
+		densityBuffer[xRead + strideDensity * yRead] += spawnArea[xRead + yRead * strideSpawn] * timePassed *
+			gMaximumSpawnRate;
 	}
 
 	
@@ -61,15 +68,16 @@ void DensityManager::EnforceBoundaryConditions(DataBase* dataBase, float timePas
 {
 	FloatArray density = m_continuitySolver.GetCurrentDensityField();
 	ApplyConditions  CUDA_DECORATOR_LOGIC (timePassed, density.m_array, density.m_stride,
-		dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
-		dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
+	                                       dataBase->GetSpawnData().m_array, dataBase->GetSpawnData().m_stride,
+	                                       dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
 }
 
 
 
 void DensityManager::GenerateDensityVisualization(uchar4* textureMemory)
 {
-	VisualizationHelper::VisualizeScalarField(m_continuitySolver.GetCurrentDensityField(), gMaximumDensity,  textureMemory);
+	VisualizationHelper::VisualizeScalarField(m_continuitySolver.GetCurrentDensityField(), gMaximumDensity,
+	                                          textureMemory);
 }
 
 void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField,  DataBase* dataBase)

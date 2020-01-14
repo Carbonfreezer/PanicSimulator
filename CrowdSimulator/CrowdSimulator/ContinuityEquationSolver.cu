@@ -17,10 +17,18 @@ void ContinuityEquationSolver::PrepareSolver()
 	m_currentFieldValid = 0;
 }
 
+void ContinuityEquationSolver::FreeResources()
+{
+	m_currentDensityField[0].FreeArray();
+	m_currentDensityField[1].FreeArray();
+	m_timeToVelocity.FreeResources();
+}
+
 
 __global__ void IntegrateEquationCuda(float deltaTime,  size_t strides, float* density,  
-								float* velocityX, float* velocityY, unsigned int* extremPoint, unsigned int* wallData,
-							float* result)
+                                      float* velocityX, float* velocityY, unsigned int* extremPoint,
+                                      unsigned int* wallData,
+                                      float* result)
 {
 	__shared__ float xMassTransport[gBlockSize + 2][gBlockSize + 2];
 	__shared__ float yMassTransport[gBlockSize + 2][gBlockSize + 2];
@@ -179,8 +187,10 @@ void ContinuityEquationSolver::IntegrateEquation(float timePassed,   FloatArray 
 			localTimeStep = timePassed;
 		}
 
-		IntegrateEquationCuda CUDA_DECORATOR_LOGIC (localTimeStep, velX.m_stride, m_currentDensityField[m_currentFieldValid].m_array, 
-			velX.m_array, velY.m_array,extremPoint.m_array, wallData.m_array, m_currentDensityField[1 - m_currentFieldValid].m_array);
+		IntegrateEquationCuda CUDA_DECORATOR_LOGIC (localTimeStep, velX.m_stride,
+		                                            m_currentDensityField[m_currentFieldValid].m_array, 
+		                                            velX.m_array, velY.m_array,extremPoint.m_array, wallData.m_array,
+		                                            m_currentDensityField[1 - m_currentFieldValid].m_array);
 
 		m_currentFieldValid = 1 - m_currentFieldValid;
 	}

@@ -10,7 +10,13 @@ void CrowdPressure::ToolSystem()
 	m_pressureArray = TransferHelper::ReserveFloatMemory();
 }
 
-__global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, float* velocityField, unsigned int* wallData,  float* result)
+void CrowdPressure::FreeResources()
+{
+	m_pressureArray.FreeArray();
+}
+
+__global__ void ComputeCrowdPressureCuda(size_t strides, float* densityField, float* velocityField,
+                                         unsigned int* wallData,  float* result)
 {
 
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
@@ -103,6 +109,7 @@ void CrowdPressure::ComputeCrowdPressure(FloatArray density, FloatArray velocity
 	assert(density.m_stride == m_pressureArray.m_stride);
 	assert(density.m_stride == wallData.m_stride);
 	
-	ComputeCrowdPressureCuda CUDA_DECORATOR_LOGIC (density.m_stride, density.m_array, velocity.m_array,  wallData.m_array   ,m_pressureArray.m_array);
+	ComputeCrowdPressureCuda CUDA_DECORATOR_LOGIC (density.m_stride, density.m_array, velocity.m_array,
+	                                               wallData.m_array   ,m_pressureArray.m_array);
 	
 }

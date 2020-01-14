@@ -4,6 +4,18 @@
 
 class DataBase;
 
+
+/**
+ * \brief Helper struct to administrate the convergence internally.
+ */
+struct ConvergenceMeasure
+{
+	int m_hasConverged;
+	int m_blocksCountedForConvergence;
+	int m_blocksHaveConverged;
+};
+
+
 /**
  * \brief Solves the eikonal equation.
  * Uses the target information
@@ -12,20 +24,34 @@ class EikonalSolver
 {
 public:
 	
-	// Visualizes the outcome of the simulation.
-	void VisualizeOutcome(uchar4* destinationMemory, float maxTimeAssumed, float distanceBetweenIsoLines);
-
-	// Prepare iterating.
+	/**
+	 * \brief Prepare iterating. 
+	 */
 	void PrepareSolving();
 
-	// Solves the equation.
+	/**
+	 * \brief Frees the allocated resources.
+	 */
+	void FreeResources();
+
+	
+	/**
+	 * \brief Solves the equation. 
+	 * \param velocityField Scalar velocity
+	 * \param dataBase Data base used for targets and walls.
+	 */
 	void SolveEquation(FloatArray velocityField, DataBase* dataBase );
 
-	// Asks for the time field.
+	/**
+	 * \brief Asks for the time field.
+	 * \return Time field returned.
+	 */
 	FloatArray GetTimeField() { return m_timeArray[1]; }
-
+	
 private:
 	// Which double buffer do we use?
 	FloatArray m_timeArray[2];
+	// Struct kept in device memory for convergence measure.
+	ConvergenceMeasure* m_convergence;
 
 };

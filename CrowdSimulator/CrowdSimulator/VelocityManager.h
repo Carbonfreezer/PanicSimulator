@@ -19,6 +19,13 @@ public:
 	 */
 	void GenerateVelocityField();
 
+
+	/**
+	 * \brief Frees the required resources.
+	 */
+	void FreeResources();
+
+	
 	/**
 	 * \brief  Updates the velocity field with the density field handed over.
 	 * This is not an incremental process.
@@ -42,7 +49,7 @@ public:
 	 * \param isoLineDistance The distances we apply between iso lines.
 	 */
 	void GenerateVelocityVisualization(uchar4* textureMemory, float isoLineDistance);
-	
+
 private:
 	FloatArray m_velocityField;
 

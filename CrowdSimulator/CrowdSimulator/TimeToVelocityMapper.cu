@@ -21,8 +21,16 @@ void TimeToVelocityMapper::PreprareModule()
 	assert(m_extremPoint.m_stride == m_velocityXResult.m_stride);
 }
 
-__global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedField, unsigned int* targetField,  float* velocityX, float* velocityY,
-	unsigned int* extremPointInfo, size_t strides)
+void TimeToVelocityMapper::FreeResources()
+{
+	m_velocityXResult.FreeArray();
+	m_velocityYResult.FreeArray();
+	m_extremPoint.FreeArray();
+}
+
+__global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedField, unsigned int* targetField,
+                                    float* velocityX, float* velocityY,
+                                    unsigned int* extremPointInfo, size_t strides)
 {
 	__shared__ float inputBuffer[gBlockSize + 2][gBlockSize + 2];
 	__shared__ unsigned int locallyBlockedField[gBlockSize + 2][gBlockSize + 2];
@@ -147,7 +155,8 @@ __global__ void ComputeVelocityCuda(float* inputField,  unsigned int* blockedFie
 
 }
 
-void TimeToVelocityMapper::ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements, UnsignedArray targetElements)
+void TimeToVelocityMapper::ComputeVelocity(FloatArray inputField, UnsignedArray blockedElements,
+                                           UnsignedArray targetElements)
 {
 	assert(m_velocityXResult.m_array);
 	assert(m_velocityXResult.m_array);
@@ -155,7 +164,8 @@ void TimeToVelocityMapper::ComputeVelocity(FloatArray inputField, UnsignedArray 
 	assert(inputField.m_stride == m_velocityXResult.m_stride);
 	assert(targetElements.m_stride == m_velocityXResult.m_stride);
 	ComputeVelocityCuda CUDA_DECORATOR_LOGIC(inputField.m_array, blockedElements.m_array, targetElements.m_array,
-		m_velocityXResult.m_array, m_velocityYResult.m_array, m_extremPoint.m_array, m_velocityXResult.m_stride);
+	                                         m_velocityXResult.m_array, m_velocityYResult.m_array,
+	                                         m_extremPoint.m_array, m_velocityXResult.m_stride);
 
 }
 

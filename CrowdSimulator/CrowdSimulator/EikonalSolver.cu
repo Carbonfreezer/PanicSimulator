@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cassert>
 #include "DataBase.h"
+#include <cuda_runtime.h>
 
 
 void EikonalSolver::PrepareSolving()
@@ -13,6 +14,14 @@ void EikonalSolver::PrepareSolving()
 	m_timeArray[0] = TransferHelper::ReserveFloatMemory();
 	m_timeArray[1] = TransferHelper::ReserveFloatMemory();
 	assert(m_timeArray[0].m_stride == m_timeArray[1].m_stride);
+	cudaMalloc<ConvergenceMeasure>(&m_convergence, sizeof(ConvergenceMeasure));
+}
+
+void EikonalSolver::FreeResources()
+{
+	m_timeArray[0].FreeArray();
+	m_timeArray[1].FreeArray();
+	cudaFree(m_convergence);
 }
 
 
@@ -49,26 +58,21 @@ __global__ void PrepareTimeField(float* timeBuffer, size_t timeStide, unsigned* 
 }
 
 
-__device__ int gHasConverged;
-
-__device__ int gBlocksCountedForConvergence;
-__device__ int gBlocksHaveConverged;
-// __device__ int gNumChecks;
 
 
-__global__ void ResetConvergence()
+__global__ void ResetConvergence(ConvergenceMeasure* convergence)
 {
-	gHasConverged = 0;
-	gBlocksCountedForConvergence = 0;
-	gBlocksHaveConverged = 0;
-	// gNumChecks = 0;
+	convergence->m_hasConverged = 0;
+	convergence->m_blocksCountedForConvergence = 0;
+	convergence->m_blocksHaveConverged = 0;
 }
 
 
-__global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestination, size_t timeStride, float* velocityField, size_t velocityStride)
+__global__ void RunEikonalGodunov(float* timeFieldSource, float* timeFieldDestination, size_t timeStride,
+                                 float* velocityField, size_t velocityStride, ConvergenceMeasure* convergence)
 {
 	// Once we have found a convergence we can quit.
-	if (gHasConverged)
+	if (convergence->m_hasConverged)
 		return;
 	
 	__shared__ float timeBuffer[2][gBlockSize + 2][gBlockSize + 2];
@@ -94,13 +98,17 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 	timeBuffer[0][xScan][yScan] = timeBuffer[1][xScan][yScan] = timeFieldSource[xOrigin  + yOrigin  * timeStride];
 
 	if (threadIdx.x == 0)
-		timeBuffer[0][xScan - 1][yScan] = timeBuffer[1][xScan - 1][yScan] = timeFieldSource[(xOrigin - 1)+ yOrigin  * timeStride];
+		timeBuffer[0][xScan - 1][yScan] = timeBuffer[1][xScan - 1][yScan] = timeFieldSource[(xOrigin - 1)+ yOrigin  *
+			timeStride];
 	if (threadIdx.x == 31)
-		timeBuffer[0][xScan + 1][yScan] = timeBuffer[1][xScan + 1][yScan] = timeFieldSource[(xOrigin + 1) + yOrigin * timeStride];
+		timeBuffer[0][xScan + 1][yScan] = timeBuffer[1][xScan + 1][yScan] = timeFieldSource[(xOrigin + 1) + yOrigin *
+			timeStride];
 	if (threadIdx.y == 0)
-		timeBuffer[0][xScan][yScan - 1] = timeBuffer[1][xScan][yScan - 1] = timeFieldSource[xOrigin + (yOrigin - 1) * timeStride];
+		timeBuffer[0][xScan][yScan - 1] = timeBuffer[1][xScan][yScan - 1] = timeFieldSource[xOrigin + (yOrigin - 1) *
+			timeStride];
 	if (threadIdx.y == 31)
-		timeBuffer[0][xScan][yScan + 1] = timeBuffer[1][xScan][yScan + 1] = timeFieldSource[xOrigin + (yOrigin + 1) * timeStride];
+		timeBuffer[0][xScan][yScan + 1] = timeBuffer[1][xScan][yScan + 1] = timeFieldSource[xOrigin + (yOrigin + 1) *
+			timeStride];
 	// Diagonal case is not used in the godunov part.
 	__syncthreads();
 
@@ -161,26 +169,18 @@ __global__ void RunIconalGodunov(float* timeFieldSource, float* timeFieldDestina
 		return;
 
 	int blockHasConverged = (convergedThreads == gBlockSize * gBlockSize);
-	atomicAdd(&gBlocksHaveConverged, blockHasConverged);
+	atomicAdd(&(convergence->m_blocksHaveConverged), blockHasConverged);
 
-	int blocksProcessed = atomicAdd(&gBlocksCountedForConvergence, 1) + 1;
+	int blocksProcessed = atomicAdd(&(convergence->m_blocksCountedForConvergence), 1) + 1;
 	if (blocksProcessed != gNumOfBlocks * gNumOfBlocks)
 		return;
 
 	// Now we are the last thread of the last block;
-	gHasConverged = (gBlocksHaveConverged == gNumOfBlocks * gNumOfBlocks);
+	convergence->m_hasConverged = (convergence->m_blocksHaveConverged == gNumOfBlocks * gNumOfBlocks);
 
 
-	/*
-	gNumChecks += 1;
-	if (gHasConverged)
-		gHasConverged = gHasConverged;
-	*/
-	
-	gBlocksCountedForConvergence = 0;
-	gBlocksHaveConverged = 0;
-
-	
+	convergence->m_blocksCountedForConvergence = 0;
+	convergence->m_blocksHaveConverged = 0;	
 }
 
 
@@ -190,17 +190,19 @@ void EikonalSolver::SolveEquation( FloatArray velocity, DataBase* dataBase)
 {
 
 	assert(m_timeArray[0].m_array);
-	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[0].m_array, m_timeArray[0].m_stride, dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
+	PrepareTimeField CUDA_DECORATOR_LOGIC (m_timeArray[0].m_array, m_timeArray[0].m_stride,
+	                                       dataBase->GetTargetData().m_array, dataBase->GetTargetData().m_stride);
 	TransferHelper::CopyDataFromTo(m_timeArray[0], m_timeArray[1]);
 
-	ResetConvergence << <1, 1 >> > ();
+	ResetConvergence << <1, 1 >> > (m_convergence);
 	
 	
 	// We have tu run a prestep to get the border filled.
 	for (int i = 0; i < gMaximumIterationsGodunov; ++i)
 	{
-		RunIconalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[i % 2].m_array, m_timeArray[1 - i % 2 ].m_array, m_timeArray[0].m_stride,
-			velocity.m_array, velocity.m_stride);
+		RunEikonalGodunov CUDA_DECORATOR_LOGIC(m_timeArray[i % 2].m_array, m_timeArray[1 - i % 2 ].m_array,
+		                                      m_timeArray[0].m_stride,
+		                                      velocity.m_array, velocity.m_stride, m_convergence);
 	}
 
 }

@@ -9,6 +9,12 @@ void LowPassFilterTest::ToolSystem(DataBase* dataBase)
 	m_filterB.PrepareModule();
 }
 
+void LowPassFilterTest::FreeResources()
+{
+	m_filterA.FreeResources();
+	m_filterB.FreeResources();
+}
+
 void LowPassFilterTest::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
 {
 	m_filterA.Filter(dataBase->GetInitialDensityData(), dataBase->GetWallData());

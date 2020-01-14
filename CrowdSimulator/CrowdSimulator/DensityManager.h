@@ -24,6 +24,11 @@ public:
 	 */
 	void InitializeManager(DataBase* dataBase);
 
+	/**
+	 * \brief Frees resources on graphics card.
+	 */
+	void FreeResources();
+
 	
 	/**
 	 * \brief Gets the density field.
@@ -60,7 +65,7 @@ public:
 	 * \param data_base The databdase with all the information.
 	 */
 	void ResetDensity(DataBase* dataBase);
-
+	
 private:
 
 	ContinuityEquationSolver m_continuitySolver;

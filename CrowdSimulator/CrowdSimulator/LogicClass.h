@@ -19,6 +19,11 @@ public:
 	 */
 	virtual void ToolSystem(DataBase* dataBase){};
 
+	/**
+	 * \brief Frees all the resources currently allocated on the graphics card.
+	 */
+	virtual void FreeResources() {};
+
 
 	/**
 	 * \brief Is called to handle the input (if desired). Handle input is called just before update system.
