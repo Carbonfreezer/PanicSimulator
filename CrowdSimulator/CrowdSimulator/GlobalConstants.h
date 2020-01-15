@@ -27,7 +27,7 @@
 /**
  * \brief The amount of pixels we use in visualization for the cell of a grid.
  */
-#define gPixelsPerCell  5
+#define gPixelsPerCell  4
 
 /**
  * \brief The resulting screen resolution we get.
