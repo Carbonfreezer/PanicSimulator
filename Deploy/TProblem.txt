@@ -1,0 +1,36 @@
+target: 	TProblemTarget.tga
+wall: 		TProblemWall.tga
+spawn:		TProblemSpawn.tga
+
+
+
+
+
+Corridor 8 persons per second enter corridor.
+
+
+Description:
+
+The file contains besides text like this one here lines that associate a keyword with a filename. Keywords and filenames are
+separated by a :. Whitespaces are ignored. The keywords are always shifted to lower case. A # uncomments the rest of the line.
+Searched for keywords are:
+
+wall   Targa file indicating the wall information (binary)
+target Targa file indicating the target information (binary)
+spawn  Targa file indicating spawn information (continiuos)
+density Targa file indicating initial density information (continuos)
+
+All Targa files must not have an alpha channel must not be RLE encoded and must have a size of  288 by 288 pixels.
+
+Keyboard:
+
+The keys are configured as follows:
+
+1: Show density
+2: Show velocity
+3: show crowd pressure 
+e: toggle display iconal solution
+a: toggle annotation (white wall, green target area, yellow despawn area
+space: Pause and unpause simulation (resets simulation velocity factor)
+cursor up / down: changes velocity factor 1, 2, 4, 8
+cursor left / right changes the distance between iso-lines in the eikonal visualization between: 1 to 15 seconds. 
