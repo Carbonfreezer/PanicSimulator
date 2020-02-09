@@ -7,6 +7,7 @@
 #include "ContinuityEquationTest.h"
 #include "SimulationCore.h"
 #include "LowPassFilterTest.h"
+#include "AccumulatorTest.h"
 #include <cassert>
 #include <cstring>
 
@@ -21,6 +22,7 @@ static EikonalTest gIconal;
 static VelocityTest gVelocity;
 static ContinuityEquationTest gContinuityTest;
 static LowPassFilterTest gLowPassFilterTest;
+static AccumulatorTest gAccumulatorTest;
 
 /**
  * \brief Function to use if we want to be able to run the test suite for the different components.
@@ -266,7 +268,10 @@ void PrepareTestSuite(char choice, const char*& title, LogicClass*& usedLogic, B
 		fileNames.m_wallFile = "Cross.tga";
 		break;
 
-		
+	case 'd':
+		title = "Accumulator Test";
+		usedLogic = &gAccumulatorTest;
+		break;
 	}
 }
 

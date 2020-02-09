@@ -5,6 +5,7 @@
 #include "EikonalSolver.h"
 #include "LowPassFilter.h"
 #include "CrowdPressure.h"
+#include "Accumulator.h"
 
 /**
  * \brief This is the core class that runs the complete simulation.
@@ -64,6 +65,9 @@ private:
 	LowPassFilter m_timeFilter[2];
 
 	CrowdPressure m_crowdPressure;
+
+	Accumulator m_pressureAccumulator;
+	Accumulator m_densityAccumulator;
 
 	FloatArray PerformLowPassIterations(FloatArray input, LowPassFilter filterPair[2], UnsignedArray wallData,  int iterations);
 

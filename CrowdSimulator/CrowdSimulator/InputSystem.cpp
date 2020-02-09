@@ -17,10 +17,17 @@ void InputSystem::InitializeSystem(GLFWwindow* window)
 	m_isoLineDistance = 7;
 	m_wasLeftPressed = false;
 	m_wasRightPressed = false;
+	m_wasStatisticsTriggered = false;
+	m_wasSPressed = false;
 }
 
 void InputSystem::Update()
 {
+	bool sDown = (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS);
+	m_wasStatisticsTriggered = (sDown && (!m_wasSPressed));
+	m_wasSPressed = sDown;
+
+
 	m_resetToggled = (glfwGetKey(m_window, GLFW_KEY_R) == GLFW_PRESS);
 
 	if (glfwGetKey(m_window, GLFW_KEY_1) == GLFW_PRESS)

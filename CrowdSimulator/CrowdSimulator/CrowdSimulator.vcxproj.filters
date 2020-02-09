@@ -31,6 +31,9 @@
     <CudaCompile Include="TimeToVelocityMapper.cu">
       <Filter>SourceFiles</Filter>
     </CudaCompile>
+    <CudaCompile Include="Accumulator.cu">
+      <Filter>SourceFiles</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -72,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="LowPassFilterTest.cpp">
       <Filter>SourceFiles\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="AccumulatorTest.cpp">
+      <Filter>SourceFiles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +158,12 @@
     </ClInclude>
     <ClInclude Include="TimeToVelocityMapper.h">
       <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Accumulator.h">
+      <Filter>HeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="AccumulatorTest.h">
+      <Filter>HeaderFiles\TestClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

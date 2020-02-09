@@ -84,6 +84,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AccumulatorTest.cpp" />
     <ClCompile Include="BaseFIleNames.cpp" />
     <ClCompile Include="ContinuityEquationTest.cpp" />
     <ClCompile Include="DataBase.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="SimulationCore.cpp" />
     <ClCompile Include="TgaReader.cpp" />
     <ClCompile Include="VelocityTest.cpp" />
+    <CudaCompile Include="Accumulator.cu" />
     <CudaCompile Include="ContinuityEquationSolver.cu" />
     <CudaCompile Include="CrowdPressure.cu" />
     <CudaCompile Include="DensityManager.cu" />
@@ -114,6 +116,8 @@
     <CudaCompile Include="VisualizationHelper.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Accumulator.h" />
+    <ClInclude Include="AccumulatorTest.h" />
     <ClInclude Include="BaseFileNames.h" />
     <ClInclude Include="CheckerTest.h" />
     <ClInclude Include="ContinuityEquationSolver.h" />

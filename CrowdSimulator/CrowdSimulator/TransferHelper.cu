@@ -122,7 +122,7 @@ UnsignedArray TransferHelper::ReserveUnsignedMemory()
 	return result;
 }
 
-FloatArray TransferHelper::UpfronFilledValue(float value)
+FloatArray TransferHelper::UpfrontFilledValue(float value)
 {
 	for (int row = 0; row < gGridSizeExternal; ++row)
 		for (int column = 0; column < gGridSizeExternal; ++column)

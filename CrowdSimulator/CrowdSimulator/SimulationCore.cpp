@@ -18,6 +18,8 @@ void SimulationCore::ToolSystem(DataBase* dataBase)
 	m_showsAnnotation = false;
 	m_showEikonalSolution = false;
 	m_crowdPressure.ToolSystem();
+	m_pressureAccumulator.ToolSystem();
+	m_densityAccumulator.ToolSystem();
 
 }
 
@@ -31,6 +33,8 @@ void SimulationCore::FreeResources()
 	m_timeFilter[0].FreeResources();
 	m_timeFilter[1].FreeResources();
 	m_crowdPressure.FreeResources();
+	m_pressureAccumulator.FreeResources();
+	m_densityAccumulator.FreeResources();
 }
 
 void SimulationCore::HandleInput(InputSystem* input, DataBase* dataBase)
@@ -66,6 +70,15 @@ void SimulationCore::HandleInput(InputSystem* input, DataBase* dataBase)
 	m_showsAnnotation = input->GetAnnotationMode();
 	m_showEikonalSolution = input->ShowsEikonalSolution();
 	m_isoLineDistance = input->GetIsoLineDistance();
+
+	if (input->IsStatisticsTriggered())
+	{
+		float sum, maximumValue;
+		m_densityAccumulator.GetResult(sum, maximumValue);
+		printf("Density        Sum: %f    Maximum: %f \n", sum, maximumValue);
+		m_pressureAccumulator.GetResult(sum, maximumValue);
+		printf("Pressure       Sum: %f    Maximum: %f \n\n", sum, maximumValue);
+	}
 }
 
 void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSeconds, DataBase* dataBase)
@@ -74,12 +87,15 @@ void SimulationCore::UpdateSystem(uchar4* deviceMemory, float timePassedInSecond
 	m_density.EnforceBoundaryConditions(dataBase, timePassedInSeconds * m_simulationFactor);
 	FloatArray densityField = m_density.GetDensityField();
 
+	m_densityAccumulator.ProcessField(densityField);
+
 	// Now we feed the density into the velocity system.
 	m_velocity.UpdateVelocityField(densityField, dataBase);
 	FloatArray velocityField = PerformLowPassIterations(m_velocity.GetVelocityField(), m_velocityFilter, dataBase->GetWallData(), gLowPassFilterVelocity);
 		
 	m_crowdPressure.ComputeCrowdPressure(densityField, velocityField, dataBase);
-	
+
+	m_pressureAccumulator.ProcessField(m_crowdPressure.GetCrowdPressure());
 	
 
 	// Feed the stuff into the Eukanal solver.

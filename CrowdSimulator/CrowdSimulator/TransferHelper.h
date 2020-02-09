@@ -46,7 +46,7 @@ public:
 	 * \param value Value to get filled into the memory.
 	 * \return Float Arrayy on graphics card.
 	 */
-	static FloatArray UpfronFilledValue(float value);
+	static FloatArray UpfrontFilledValue(float value);
 
 	/**
 	 * \brief Copies data from to on the GPU.

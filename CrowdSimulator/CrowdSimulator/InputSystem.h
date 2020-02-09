@@ -46,6 +46,12 @@ public:
 	bool IsSimulationPaused() { return m_isSimulationPaused; }
 
 	/**
+	 * \brief Returns if we want to dump statistics.
+	 * \return Returns true if we want to dump statistics. 
+	 */
+	bool IsStatisticsTriggered() { return m_wasStatisticsTriggered;  }
+
+	/**
 	 * \brief Gets the velocity selector from the input ranging from 0 to 3 
 	 * \return Velocity indicator.
 	 */
@@ -79,9 +85,12 @@ private:
 	bool m_isSimulationPaused;
 	bool m_wasUpPressed;
 	bool m_wasDownPressed;
+	bool m_wasSPressed;
 
 
 	bool m_wasLeftPressed;
 	bool m_wasRightPressed;
+
+	bool m_wasStatisticsTriggered;
 
 };
