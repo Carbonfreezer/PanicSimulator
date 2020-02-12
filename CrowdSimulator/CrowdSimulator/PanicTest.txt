@@ -1,11 +1,8 @@
- target: 	EvacuationTarget.tga
- despawn: 	EvacuationTarget.tga
- wall: 	EvacuationWall.tga
-#  wall: 		EvacuationWall2.tga
+ target: 	PanicTestDespawn.tga
+ wall: 		PanicTestWall.tga
 
- density:	EvacuationSpawn.tga
-# density:	EvacuationSpawn2.tga
-
+ density:	PanicTestDensity.tga
+  limit:        PanicTestVelocity.tga
 
 
 Spawn Density: 2 Person /sqm 

@@ -46,7 +46,13 @@ void BaseFileNames::LoadFilenames(const char* initializationFile)
 		{
 			m_internalDensityFile = file;
 			m_initialDensityFile = m_internalDensityFile.c_str();
-		}		
+		}
+
+		if (key == "limit")
+		{
+			m_velocityLimiterFile = file;
+			m_velocityLimiter = m_velocityLimiterFile.c_str();
+		}
 	}
 }
 

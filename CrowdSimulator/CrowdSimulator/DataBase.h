@@ -46,6 +46,12 @@ public:
 	 */
 	UnsignedArray GetWallData() { return m_wallData; }
 
+	/**
+	 * \brief 
+	 * \return 
+	 */
+	FloatArray GetVelocityLimitData() { return m_velocityLimitData; }
+
 
 	/**
 	 * \brief Contains target data where people try to walk to. (digital)
@@ -54,6 +60,11 @@ public:
 	 */
 	UnsignedArray GetTargetData() { return  m_targetData; }
 
+
+	
+
+	
+	
 	
 	
 private:
@@ -63,15 +74,15 @@ private:
 	
 	FloatArray m_initialDensityData;
 	FloatArray m_spawnData;
+	FloatArray m_velocityLimitData;
 
 	UnsignedArray m_wallData;
 	UnsignedArray m_targetData;
 	UnsignedArray m_wallDespawn;
 
-
 	UnsignedArray DefaultLoadUnsigned(const char* fileName);
 	FloatArray DefaultLoadFloat(const char* fileName);
-	
+	FloatArray DefaultMaxVelocity(const char* fileName);
 	
 	
 };

@@ -16,12 +16,14 @@ void DataBase::LoadFiles(BaseFileNames filenames)
 
 	m_spawnData = DefaultLoadFloat(filenames.m_spawnFile);
 	m_initialDensityData = DefaultLoadFloat(filenames.m_initialDensityFile);
+	m_velocityLimitData = DefaultMaxVelocity(filenames.m_velocityLimiter);
 }
 
 void DataBase::FreeResources()
 {
 	m_initialDensityData.FreeArray();
 	m_spawnData.FreeArray();
+	m_velocityLimitData.FreeArray();
 
 	m_wallData.FreeArray();
 	m_targetData.FreeArray();
@@ -47,4 +49,15 @@ FloatArray DataBase::DefaultLoadFloat(const char* fileName)
 	}
 
 	return TransferHelper::ReserveFloatMemory();
+}
+
+FloatArray DataBase::DefaultMaxVelocity(const char* fileName)
+{
+	if (fileName != NULL)
+	{
+		m_reader.ReadFile(fileName);
+		return TransferHelper::UploadPictureAsFloat(&m_reader, gMaximumWalkingVelocity, 0.0f, gMaximumWalkingVelocity);
+	}
+
+	return TransferHelper::UpfrontFilledValue(gMaximumWalkingVelocity);
 }

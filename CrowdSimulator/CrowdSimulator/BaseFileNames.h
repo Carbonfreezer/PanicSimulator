@@ -9,7 +9,7 @@
  */
 struct BaseFileNames
 {
-	BaseFileNames() : m_wallFile(NULL), m_targetFile(NULL), m_spawnFile(NULL),  m_initialDensityFile(NULL) {}
+	BaseFileNames() : m_wallFile(NULL), m_targetFile(NULL), m_spawnFile(NULL),  m_initialDensityFile(NULL), m_velocityLimiter(NULL) {}
 
 	
 	/**
@@ -42,6 +42,13 @@ struct BaseFileNames
 	 */
 	const char* m_initialDensityFile;
 
+	/**
+	 * \brief The filename of the velocity limiter if we have one.
+	 */
+	const char* m_velocityLimiter;
+
+	
+
 private:
 	void ParseLine(const std::string& line, std::string& key, std::string& file);
 
@@ -49,4 +56,5 @@ private:
 	std::string m_internalTargetFile;
 	std::string m_internalSpawnFile;
 	std::string m_internalDensityFile;
+	std::string m_velocityLimiterFile;
 };
