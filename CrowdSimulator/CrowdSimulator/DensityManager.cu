@@ -88,4 +88,5 @@ void DensityManager::UpdateDensityField(float timePassed, FloatArray timeField, 
 void DensityManager::ResetDensity(DataBase* dataBase)
 {
 	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_continuitySolver.GetCurrentDensityField());
+	TransferHelper::CopyDataFromTo(dataBase->GetInitialDensityData(), m_continuitySolver.GetAlternateDensityField());
 }

@@ -36,7 +36,14 @@ public:
 	 * \return Up to date density field.
 	 */
 	FloatArray GetCurrentDensityField() { return m_currentDensityField[m_currentFieldValid]; }
+
 	
+	/**
+	 * \brief Gets the alternate density field needed for initialization.
+	 * \return The alternate density field.
+	 */
+	FloatArray GetAlternateDensityField() { return m_currentDensityField[1 - m_currentFieldValid]; }
+
 private:
 	// This contains the gradient of the eikonal equation.
 	TimeToVelocityMapper m_timeToVelocity;
